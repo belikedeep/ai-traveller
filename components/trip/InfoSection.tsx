@@ -27,7 +27,7 @@ function InfoSection({ trip }: TripProps) {
     try {
       const locationName = trip?.userSelection.location.label;
       const result = await GetPlaceDetails(locationName);
-      const place = result.data?.results?.[0];
+      const place = result?.data?.results?.[0];
 
       if (place?.photos?.[0]?.photo_reference) {
         const photoRef = place.photos[0].photo_reference;

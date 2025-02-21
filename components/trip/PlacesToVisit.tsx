@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable react-hooks/exhaustive-deps */
 import Link from "next/link";
 import { useEffect, useState, useCallback, memo } from "react";
 import { GetPlaceDetails, GetPlacePhoto } from "@/service/GlobalAPI";
@@ -38,18 +39,26 @@ function PlacesToVisit({ trip }: TripProps) {
   const [loading, setLoading] = useState(false);
 
   // Convert itinerary object to array
-  const days = Object.entries(trip?.tripData?.itinerary || {});
+  const memoizedTrip = useMemo(() => trip, [trip]);
+  const memoizedItinerary = useMemo(
+    () => memoizedTrip?.tripData?.itinerary || {},
+    [memoizedTrip?.tripData?.itinerary]
+  );
+  const memoizedDays = useMemo(
+    () => Object.entries(memoizedTrip?.tripData?.itinerary || {}),
+    [memoizedTrip]
+  );
 
   const fetchPlacePhotos = useCallback(async () => {
     setLoading(true);
     try {
       const photos: Record<string, string> = {};
-      for (const [, dayData] of days) {
+      for (const [, dayData] of memoizedDays) {
         for (const place of dayData.places) {
           const query = `${place.placeName} ${trip?.userSelection.location.label}`;
           const result = await GetPlaceDetails(query);
 
-          if (result.data?.results?.[0]?.photos?.[0]?.photo_reference) {
+          if (result?.data?.results?.[0]?.photos?.[0]?.photo_reference) {
             const photoRef = result.data.results[0].photos[0].photo_reference;
             const url = GetPlacePhoto(photoRef);
             if (url) {
@@ -64,19 +73,13 @@ function PlacesToVisit({ trip }: TripProps) {
     } finally {
       setLoading(false);
     }
-  }, [trip?.userSelection.location.label, trip?.tripData?.itinerary, days]);
+  }, [trip?.userSelection.location.label, memoizedDays]);
 
   useEffect(() => {
     if (trip?.tripData?.itinerary) {
       fetchPlacePhotos();
     }
-  }, [trip?.tripData?.itinerary, fetchPlacePhotos]);
-
-  const memoizedTrip = useMemo(() => trip, [trip]);
-  const memoizedDays = useMemo(
-    () => Object.entries(memoizedTrip?.tripData?.itinerary || {}),
-    [memoizedTrip?.tripData?.itinerary]
-  );
+  }, [memoizedItinerary, fetchPlacePhotos]);
 
   return (
     <div>

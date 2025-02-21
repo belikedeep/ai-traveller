@@ -3,6 +3,20 @@ import axios from "axios";
 const API_CALL_INTERVAL = 500; // milliseconds
 let lastApiCallTime = 0;
 
+interface PlaceDetailsResult {
+  photos?: { photo_reference: string }[];
+}
+
+interface PlaceDetailsData {
+  results?: PlaceDetailsResult[];
+}
+
+interface PlaceDetailsResponse {
+  data: PlaceDetailsData;
+}
+
+const placeDetailsCache = new Map<string, PlaceDetailsResponse>();
+
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 interface ApiParams {
@@ -34,15 +48,28 @@ const makeApiCall = async (url: string, params: ApiParams) => {
   }
 };
 
-export const GetPlaceDetails = (query: string) => {
-  return makeApiCall("/api/place-details", { query });
+export const GetPlaceDetails = async (query: string) => {
+  if (placeDetailsCache.has(query)) {
+    return placeDetailsCache.get(query);
+  }
+
+  const response = await makeApiCall("/api/place-details", { query });
+  placeDetailsCache.set(query, response);
+  return response;
 };
 
-export const GetHotelDetails = (hotelName: string, location: string) => {
-  return makeApiCall("/api/place-details", {
-    query: `${hotelName} hotel in ${location}`,
+export const GetHotelDetails = async (hotelName: string, location: string) => {
+  const query = `${hotelName} hotel in ${location}`;
+  if (placeDetailsCache.has(query)) {
+    return placeDetailsCache.get(query);
+  }
+
+  const response = await makeApiCall("/api/place-details", {
+    query,
     type: "lodging",
   });
+  placeDetailsCache.set(query, response);
+  return response;
 };
 
 export const GetPlacePhoto = (photoReference: string, maxwidth = 800) => {

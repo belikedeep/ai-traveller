@@ -42,7 +42,7 @@ function Hotels({ trip }: TripProps) {
           trip?.userSelection.location.label
         );
 
-        if (result.data?.results?.[0]?.photos?.[0]?.photo_reference) {
+        if (result?.data?.results?.[0]?.photos?.[0]?.photo_reference) {
           const photoRef = result.data.results[0].photos[0].photo_reference;
           const url = GetPlacePhoto(photoRef);
           if (url) {
