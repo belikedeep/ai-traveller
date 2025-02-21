@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { GetPlaceDetails, GetPlacePhoto } from "@/service/GlobalAPI";
+import Image from "next/image";
 
 interface Place {
   placeName: string;
@@ -30,20 +31,16 @@ interface TripProps {
   };
 }
 
-export default function PlacesToVisit({ trip }: TripProps) {
+import { useMemo } from "react";
+
+function PlacesToVisit({ trip }: TripProps) {
   const [placePhotos, setPlacePhotos] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   // Convert itinerary object to array
   const days = Object.entries(trip?.tripData?.itinerary || {});
 
-  useEffect(() => {
-    if (trip?.tripData?.itinerary) {
-      fetchPlacePhotos();
-    }
-  }, [trip]);
-
-  const fetchPlacePhotos = async () => {
+  const fetchPlacePhotos = useCallback(async () => {
     setLoading(true);
     try {
       const photos: Record<string, string> = {};
@@ -67,14 +64,26 @@ export default function PlacesToVisit({ trip }: TripProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [trip?.userSelection.location.label, trip?.tripData?.itinerary]);
+
+  useEffect(() => {
+    if (trip?.tripData?.itinerary) {
+      fetchPlacePhotos();
+    }
+  }, [trip?.tripData?.itinerary, fetchPlacePhotos]);
+
+  const memoizedTrip = useMemo(() => trip, [trip]);
+  const memoizedDays = useMemo(
+    () => Object.entries(memoizedTrip?.tripData?.itinerary || {}),
+    [memoizedTrip?.tripData?.itinerary]
+  );
 
   return (
     <div>
       <h2 className="text-xl font-bold">Places to Visit</h2>
 
       <div>
-        {days.map(([dayKey, dayData]) => (
+        {memoizedDays.map(([dayKey, dayData]) => (
           <div
             key={dayKey}
             className="p-4 border rounded-lg hover:shadow-md mb-4"
@@ -99,7 +108,9 @@ export default function PlacesToVisit({ trip }: TripProps) {
                       loading ? "animate-pulse" : ""
                     }`}
                   >
-                    <img
+                    <Image
+                      width={150}
+                      height={150}
                       src={placePhotos[place.placeName] || "/placeholder.jpg"}
                       alt={place.placeName}
                       className="w-full h-48 object-cover rounded mb-2"
@@ -124,3 +135,5 @@ export default function PlacesToVisit({ trip }: TripProps) {
     </div>
   );
 }
+
+export default memo(PlacesToVisit);

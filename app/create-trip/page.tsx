@@ -24,7 +24,6 @@ import axios from "axios";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/service/FirebaseConfig";
 import { useRouter } from "next/navigation";
-
 interface GooglePlaceData {
   label: string;
   value: {
@@ -176,7 +175,8 @@ export default function CreateTripPage() {
             apiKey={process.env.NEXT_PUBLIC_GOOGLE_PLACE_API_KEY}
             selectProps={{
               value: place,
-              onChange: (l: GooglePlaceData) => {
+              onChange: (newValue) => {
+                const l = newValue?.value as GooglePlaceData;
                 setPlace(l);
                 handleInputChange("location", l);
               },
@@ -248,7 +248,7 @@ export default function CreateTripPage() {
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
-            <img src="/logo.svg" alt="Logo" />
+            {/* <Image src="/logo.svg" alt="Logo" width={24} /> */}
             <DialogTitle>Sign in with Google</DialogTitle>
             <DialogDescription>
               <p>Sign in to the App with Google authentication securely</p>

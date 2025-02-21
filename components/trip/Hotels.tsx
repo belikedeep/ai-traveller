@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { GetHotelDetails, GetPlacePhoto } from "@/service/GlobalAPI";
+import Image from "next/image";
 
 interface HotelOption {
   hotelName: string;
@@ -25,17 +26,13 @@ interface TripProps {
   };
 }
 
-export default function Hotels({ trip }: TripProps) {
+import { useMemo } from "react";
+
+function Hotels({ trip }: TripProps) {
   const [hotelPhotos, setHotelPhotos] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (trip?.tripData.hotel_options) {
-      fetchHotelPhotos();
-    }
-  }, [trip]);
-
-  const fetchHotelPhotos = async () => {
+  const fetchHotelPhotos = useCallback(async () => {
     setLoading(true);
     try {
       const photos: Record<string, string> = {};
@@ -59,13 +56,21 @@ export default function Hotels({ trip }: TripProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [trip?.userSelection.location.label, trip?.tripData.hotel_options]);
+
+  useEffect(() => {
+    if (trip?.tripData.hotel_options) {
+      fetchHotelPhotos();
+    }
+  }, [trip?.tripData.hotel_options, fetchHotelPhotos]);
+
+  const memoizedTrip = useMemo(() => trip, [trip]);
 
   return (
     <div>
       <h2 className="text-xl font-bold">Hotels Recommendation</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-5">
-        {trip?.tripData.hotel_options.map((hotel, index) => (
+        {memoizedTrip?.tripData.hotel_options.map((hotel, index) => (
           <Link
             key={index}
             href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -78,9 +83,11 @@ export default function Hotels({ trip }: TripProps) {
                 loading ? "animate-pulse" : ""
               }`}
             >
-              <img
+              <Image
                 src={hotelPhotos[hotel.hotelName] || "/placeholder.jpg"}
                 alt={hotel.hotelName}
+                width={150}
+                height={150}
                 className="w-full h-48 object-cover rounded-lg"
               />
               <h2 className="text-lg font-bold mt-2">{hotel?.hotelName}</h2>
@@ -94,3 +101,5 @@ export default function Hotels({ trip }: TripProps) {
     </div>
   );
 }
+
+export default memo(Hotels);

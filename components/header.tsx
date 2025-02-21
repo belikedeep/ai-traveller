@@ -75,7 +75,7 @@ export default function Header() {
       <Image
         src="/logo.svg"
         alt="Logo"
-        width={120}
+        width={40}
         height={40}
         className="cursor-pointer"
         onClick={() => router.push("/")}
@@ -117,7 +117,6 @@ export default function Header() {
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
-            <img src="/logo.svg" alt="Logo" />
             <DialogTitle>Sign in with Google</DialogTitle>
             <DialogDescription>
               <p>Sign in to the App with Google authentication securely</p>

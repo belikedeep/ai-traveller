@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { GetPlaceDetails, GetPlacePhoto } from "@/service/GlobalAPI";
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useEffect, useState, useCallback, memo } from "react";
 
 interface TripProps {
   trip: {
@@ -17,16 +18,12 @@ interface TripProps {
   };
 }
 
-export default function InfoSection({ trip }: TripProps) {
+import { useMemo } from "react";
+
+function InfoSection({ trip }: TripProps) {
   const [photoUrl, setPhotoUrl] = useState("/placeholder.jpg");
 
-  useEffect(() => {
-    if (trip?.userSelection.location.label) {
-      fetchPlacePhoto();
-    }
-  }, [trip]);
-
-  const fetchPlacePhoto = async () => {
+  const fetchPlacePhoto = useCallback(async () => {
     try {
       const locationName = trip?.userSelection.location.label;
       const result = await GetPlaceDetails(locationName);
@@ -42,11 +39,21 @@ export default function InfoSection({ trip }: TripProps) {
     } catch (error) {
       console.error("Error fetching place photo:", error);
     }
-  };
+  }, [trip?.userSelection.location.label]);
+
+  useEffect(() => {
+    if (trip?.userSelection.location.label) {
+      fetchPlacePhoto();
+    }
+  }, [trip?.userSelection.location.label, fetchPlacePhoto]);
+
+  const memoizedTrip = useMemo(() => trip, [trip]);
 
   return (
     <div>
-      <img
+      <Image
+        width={150}
+        height={150}
         src={photoUrl}
         alt={trip?.userSelection.location.label || "trip"}
         className="h-[340px] w-full object-cover rounded"
@@ -55,17 +62,17 @@ export default function InfoSection({ trip }: TripProps) {
       <div className="flex justify-between items-center">
         <div className="my-5 flex flex-col gap-2">
           <h2 className="text-lg text-gray-500 mt-1">
-            {trip?.userSelection.location.label}
+            {memoizedTrip?.userSelection.location.label}
           </h2>
           <div className="flex gap-2">
             <h2 className="p-1 px-3 bg-gray-200 rounded-full">
-              {trip?.userSelection?.noOfDays} Day
+              {memoizedTrip?.userSelection?.noOfDays} Day
             </h2>
             <h2 className="p-1 px-3 bg-gray-200 rounded-full">
-              {trip?.userSelection?.budget} Budget
+              {memoizedTrip?.userSelection?.budget} Budget
             </h2>
             <h2 className="p-1 px-3 bg-gray-200 rounded-full">
-              No. of travelers: {trip?.userSelection?.travellingWith}
+              No. of travelers: {memoizedTrip?.userSelection?.travellingWith}
             </h2>
           </div>
         </div>
@@ -75,3 +82,5 @@ export default function InfoSection({ trip }: TripProps) {
     </div>
   );
 }
+
+export default memo(InfoSection);
