@@ -1,3 +1,6 @@
+"use client";
+
+import { use, useEffect, useState, useCallback } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/service/FirebaseConfig";
 import InfoSection from "@/components/trip/InfoSection";
@@ -37,32 +40,36 @@ interface TripData {
   };
 }
 
-async function getTripData(tripId: string): Promise<TripData | null> {
-  try {
-    const docRef = doc(db, "AITrips", tripId);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      return docSnap.data() as TripData;
-    } else {
-      console.log("No such document!");
-      return null;
-    }
-  } catch (error) {
-    console.error("Error fetching trip:", error);
-    return null;
-  }
-}
-
-export default async function ViewTripPage({
+export default function ViewTripPage({
   params,
 }: {
-  params: { tripId: string };
+  params: Promise<{ tripId: string }>;
 }) {
-  const { tripId } = await params;
-  const tripData = await getTripData(tripId);
+  const unwrappedParams = use(params);
+  const [trip, setTrip] = useState<TripData | null>(null);
 
-  if (!tripData) {
+  const getTripData = useCallback(async () => {
+    try {
+      const docRef = doc(db, "AITrips", unwrappedParams.tripId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        setTrip(docSnap.data() as TripData);
+      } else {
+        console.log("No such document!");
+      }
+    } catch (error) {
+      console.error("Error fetching trip:", error);
+    }
+  }, [unwrappedParams.tripId]);
+
+  useEffect(() => {
+    if (unwrappedParams.tripId) {
+      getTripData();
+    }
+  }, [unwrappedParams.tripId, getTripData]);
+
+  if (!trip) {
     return (
       <div className="flex justify-center items-center h-96">Loading...</div>
     );
@@ -70,12 +77,12 @@ export default async function ViewTripPage({
 
   return (
     <div className="p-10 md:px-20 lg:px-40 xl:px-56">
-      <InfoSection trip={tripData} />
+      <InfoSection trip={trip} />
       <div className="mt-10">
-        <Hotels trip={tripData} />
+        <Hotels trip={trip} />
       </div>
       <div className="mt-10">
-        <PlacesToVisit trip={tripData} />
+        <PlacesToVisit trip={trip} />
       </div>
     </div>
   );

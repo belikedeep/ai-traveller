@@ -64,7 +64,7 @@ function PlacesToVisit({ trip }: TripProps) {
     } finally {
       setLoading(false);
     }
-  }, [trip?.userSelection.location.label, trip?.tripData?.itinerary]);
+  }, [trip?.userSelection.location.label, trip?.tripData?.itinerary, days]);
 
   useEffect(() => {
     if (trip?.tripData?.itinerary) {
