@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Map, Settings, Star, Clock, Shield, Globe } from "lucide-react";
+import { Map, Settings, Star, Clock, Shield } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
