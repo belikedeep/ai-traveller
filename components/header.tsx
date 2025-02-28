@@ -123,6 +123,10 @@ export default function Header() {
       <div className="flex items-center gap-4">
         {user ? (
           <>
+            <Button onClick={() => router.push("/create-trip")}>
+              Create Trip
+            </Button>
+
             <Button onClick={() => router.push("/my-trips")}>My Trips</Button>
             <Popover>
               <PopoverTrigger>

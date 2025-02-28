@@ -10,6 +10,7 @@ import {
 import { chatSession } from "@/service/AIModel";
 import { useEffect, useState } from "react";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
+import type { SingleValue } from "react-select";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -55,7 +56,7 @@ interface TokenInfo {
 }
 
 export default function CreateTripPage() {
-  const [place, setPlace] = useState<GooglePlaceData>();
+  const [place, setPlace] = useState<GooglePlaceData | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState<FormData>({});
   const [loading, setLoading] = useState(false);
@@ -97,7 +98,8 @@ export default function CreateTripPage() {
         return;
       }
       if (
-        (formData?.noOfDays && formData.noOfDays > 5 && !formData?.location) ||
+        !formData?.location ||
+        !formData?.noOfDays ||
         !formData?.budget ||
         !formData?.travellingWith
       ) {
@@ -175,10 +177,15 @@ export default function CreateTripPage() {
             apiKey={process.env.NEXT_PUBLIC_GOOGLE_PLACE_API_KEY}
             selectProps={{
               value: place,
-              onChange: (newValue) => {
-                const l = newValue?.value as GooglePlaceData;
-                setPlace(l);
-                handleInputChange("location", l);
+              onChange: (newValue: SingleValue<GooglePlaceData>) => {
+                if (newValue) {
+                  const placeData: GooglePlaceData = {
+                    label: newValue.label,
+                    value: newValue.value,
+                  };
+                  setPlace(placeData);
+                  handleInputChange("location", placeData);
+                }
               },
             }}
           />
