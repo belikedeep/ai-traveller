@@ -19,11 +19,11 @@ import { FcGoogle } from "react-icons/fc";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import Image from "next/image";
+import { initializeUser, getUser } from "@/service/UserService";
+import type { User } from "@/service/UserService";
 
-interface UserProfile {
-  name: string;
-  email: string;
-  picture: string;
+interface UserProfile extends Omit<User, "credits"> {
+  credits?: number;
 }
 
 interface TokenInfo {
@@ -48,20 +48,36 @@ export default function Header() {
     scope: "email profile",
   });
 
-  const GetUserProfile = (tokenInfo: TokenInfo) => {
-    axios
-      .get<UserProfile>(`https://www.googleapis.com/oauth2/v1/userinfo`, {
-        headers: {
-          Authorization: `Bearer ${tokenInfo?.access_token}`,
-          Accept: "application/json",
-        },
-      })
-      .then((res) => {
-        localStorage.setItem("user", JSON.stringify(res.data));
-        setUser(res.data);
-        setOpenDialog(false);
-      })
-      .catch((err) => console.error("Error fetching user profile:", err));
+  const GetUserProfile = async (tokenInfo: TokenInfo) => {
+    try {
+      const response = await axios.get<UserProfile>(
+        `https://www.googleapis.com/oauth2/v1/userinfo`,
+        {
+          headers: {
+            Authorization: `Bearer ${tokenInfo?.access_token}`,
+            Accept: "application/json",
+          },
+        }
+      );
+
+      const googleUser = response.data;
+      const firestoreUser = await initializeUser(googleUser);
+
+      if (!firestoreUser) {
+        throw new Error("Failed to initialize user");
+      }
+
+      const userWithCredits = {
+        ...googleUser,
+        credits: firestoreUser.credits,
+      };
+
+      localStorage.setItem("user", JSON.stringify(userWithCredits));
+      setUser(userWithCredits);
+      setOpenDialog(false);
+    } catch (err) {
+      console.error("Error fetching user profile:", err);
+    }
   };
 
   const handleLogout = () => {
@@ -123,10 +139,12 @@ export default function Header() {
       <div className="flex items-center gap-4">
         {user ? (
           <>
+            <Button onClick={() => router.push("/pricing")} variant="outline">
+              {user.credits ?? 0} Credits
+            </Button>
             <Button onClick={() => router.push("/create-trip")}>
               Create Trip
             </Button>
-
             <Button onClick={() => router.push("/my-trips")}>My Trips</Button>
             <Popover>
               <PopoverTrigger>

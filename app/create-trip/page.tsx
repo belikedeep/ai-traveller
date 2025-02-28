@@ -25,6 +25,11 @@ import axios from "axios";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/service/FirebaseConfig";
 import { useRouter } from "next/navigation";
+import {
+  updateUserCredits,
+  getUser,
+  CREDIT_COSTS,
+} from "@/service/UserService";
 interface GooglePlaceData {
   label: string;
   value: {
@@ -49,6 +54,7 @@ interface UserProfile {
   email: string;
   name: string;
   picture: string;
+  credits?: number;
 }
 
 interface TokenInfo {
@@ -97,6 +103,22 @@ export default function CreateTripPage() {
         setOpenDialog(true);
         return;
       }
+
+      const userData = JSON.parse(user) as UserProfile;
+
+      // Check if user has enough credits
+      const firestoreUser = await getUser(userData.email);
+      if (
+        !firestoreUser ||
+        firestoreUser.credits < CREDIT_COSTS.TRIP_CREATION
+      ) {
+        toast(
+          "Insufficient credits. Please purchase more credits to create a trip."
+        );
+        router.push("/pricing");
+        return;
+      }
+
       if (
         !formData?.location ||
         !formData?.noOfDays ||
@@ -119,7 +141,24 @@ export default function CreateTripPage() {
 
       const result = await chatSession.sendMessage(FINAL_PROMPT);
       setLoading(false);
-      SaveAiTrip(result?.response?.text());
+      if (result?.response) {
+        const tripData = result.response.text();
+        await SaveAiTrip(tripData);
+
+        // Deduct credits and update local storage
+        const updatedUser = await updateUserCredits(
+          userData.email,
+          firestoreUser.credits - CREDIT_COSTS.TRIP_CREATION
+        );
+
+        if (updatedUser) {
+          const updatedLocalUser = {
+            ...userData,
+            credits: updatedUser.credits,
+          };
+          localStorage.setItem("user", JSON.stringify(updatedLocalUser));
+        }
+      }
     }
   };
 
