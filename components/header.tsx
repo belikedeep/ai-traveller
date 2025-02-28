@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import {
   Popover,
   PopoverContent,
@@ -33,13 +32,35 @@ interface TokenInfo {
 export default function Header() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
+    const checkUserAndCredits = async () => {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        // Get latest credits from Firestore
+        const firestoreUser = await getUser(parsedUser.email);
+        if (firestoreUser) {
+          const updatedUser = { ...parsedUser, credits: firestoreUser.credits };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          setUser(updatedUser);
+        } else {
+          setUser(parsedUser);
+        }
+      }
+    };
+
+    checkUserAndCredits();
+
+    // Listen for storage changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "user" && e.newValue) {
+        setUser(JSON.parse(e.newValue));
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const login = useGoogleLogin({
@@ -83,69 +104,38 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
-    router.push("/");
+    window.location.href = "/";
+  };
+
+  const handleNavigation = (path: string) => {
+    window.location.href = path;
   };
 
   return (
     <div className="p-3 shadow-sm flex justify-between items-center px-5">
-      {/* Header */}
-      {/* <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 py-4 shadow-sm">
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Plane className="h-6 w-6 text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-800">TripAI</h1>
-          </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <Link
-              href="#features"
-              className="text-gray-600 hover:text-gray-900"
-            >
-              Features
-            </Link>
-            <Link
-              href="#how-it-works"
-              className="text-gray-600 hover:text-gray-900"
-            >
-              How it Works
-            </Link>
-            <Link href="#pricing" className="text-gray-600 hover:text-gray-900">
-              Pricing
-            </Link>
-            <Link href="/login">
-              <Button variant="outline" className="mr-2">
-                Login
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button>Sign Up</Button>
-            </Link>
-          </nav>
-        </div>
-      </header> */}
       <Image
         src="/logo.svg"
         alt="Logo"
         width={40}
         height={40}
         className="cursor-pointer"
-        onClick={() => {
-          if (user) {
-            router.push("/my-trips");
-          } else {
-            router.push("/");
-          }
-        }}
+        onClick={() => handleNavigation(user ? "/my-trips" : "/")}
       />
       <div className="flex items-center gap-4">
         {user ? (
           <>
-            <Button onClick={() => router.push("/pricing")} variant="outline">
+            <Button
+              onClick={() => handleNavigation("/pricing")}
+              variant="outline"
+            >
               {user.credits ?? 0} Credits
             </Button>
-            <Button onClick={() => router.push("/create-trip")}>
+            <Button onClick={() => handleNavigation("/create-trip")}>
               Create Trip
             </Button>
-            <Button onClick={() => router.push("/my-trips")}>My Trips</Button>
+            <Button onClick={() => handleNavigation("/my-trips")}>
+              My Trips
+            </Button>
             <Popover>
               <PopoverTrigger>
                 <Image

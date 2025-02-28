@@ -1,17 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { updateUserCredits, getUser } from "@/service/UserService";
-import { useEffect, useState } from "react";
+import { getStripe } from "@/lib/stripe-client";
+import { useEffect, useState, Suspense, type ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { STRIPE_PLANS } from "@/lib/stripe";
 
 const PRICING_PLANS = [
   {
-    name: "Basic",
-    credits: 5,
-    price: "$10",
+    name: "BASIC",
+    credits: STRIPE_PLANS.BASIC.credits,
+    price: `$${STRIPE_PLANS.BASIC.price / 100}`,
     features: [
       "5 AI Trip Itineraries",
       "Basic Destinations",
@@ -19,9 +19,9 @@ const PRICING_PLANS = [
     ],
   },
   {
-    name: "Pro",
-    credits: 15,
-    price: "$25",
+    name: "PRO",
+    credits: STRIPE_PLANS.PRO.credits,
+    price: `$${STRIPE_PLANS.PRO.price / 100}`,
     features: [
       "15 AI Trip Itineraries",
       "Premium Destinations",
@@ -30,9 +30,9 @@ const PRICING_PLANS = [
     ],
   },
   {
-    name: "Premium",
-    credits: 50,
-    price: "$75",
+    name: "PREMIUM",
+    credits: STRIPE_PLANS.PREMIUM.credits,
+    price: `$${STRIPE_PLANS.PREMIUM.price / 100}`,
     features: [
       "50 AI Trip Itineraries",
       "All Destinations",
@@ -43,10 +43,9 @@ const PRICING_PLANS = [
   },
 ];
 
-export default function PricingPage() {
+function PricingPageContent(): ReactNode {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const router = useRouter();
   const [userData, setUserData] = useState<{
     name: string;
     email: string;
@@ -54,52 +53,102 @@ export default function PricingPage() {
     credits?: number;
   } | null>(null);
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     const user = localStorage.getItem("user");
     if (user) {
       setUserData(JSON.parse(user));
     } else {
-      router.push("/");
+      window.location.href = "/";
     }
-  }, [router]);
+  }, []); // Only run on mount
 
-  const handlePurchase = async (credits: number) => {
+  useEffect(() => {
+    let isSubscribed = true;
+
+    const handlePaymentStatus = async () => {
+      const success = searchParams.get("success");
+      const error = searchParams.get("error");
+
+      if (!success && !error) return;
+
+      if (success === "true") {
+        const newCredits = searchParams.get("newCredits");
+        if (newCredits && userData && isSubscribed) {
+          const credits = parseInt(newCredits);
+          const updatedUserData = {
+            ...userData,
+            credits,
+          };
+          localStorage.setItem("user", JSON.stringify(updatedUserData));
+          setUserData(updatedUserData);
+
+          toast({
+            title: "Payment Successful!",
+            description: `Your account has been credited with ${newCredits} credits.`,
+          });
+        }
+      } else if (error === "true") {
+        const errorMessage = searchParams.get("message");
+        toast({
+          title: "Payment Failed",
+          description:
+            errorMessage || "There was an error processing your payment.",
+          variant: "destructive",
+        });
+      }
+
+      // Clean up URL parameters using history API instead of router
+      if (isSubscribed) {
+        window.history.replaceState({}, "", "/pricing");
+      }
+    };
+
+    handlePaymentStatus();
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [searchParams, toast, userData]);
+
+  const handlePurchase = async (planName: string) => {
     if (!userData) return;
 
     setLoading(true);
     try {
-      const user = await getUser(userData.email);
-      if (!user) {
-        toast({
-          title: "Error",
-          description: "User not found",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const updatedUser = await updateUserCredits(
-        userData.email,
-        user.credits + credits
-      );
-
-      if (!updatedUser) {
-        throw new Error("Failed to update user credits");
-      }
-
-      // Update local storage with new credit balance
-      const updatedUserData = { ...userData, credits: updatedUser.credits };
-      localStorage.setItem("user", JSON.stringify(updatedUserData));
-      setUserData(updatedUserData);
-
-      toast({
-        title: "Success!",
-        description: `Added ${credits} credits to your account. New balance: ${updatedUser.credits} credits`,
+      // Create Checkout Session
+      const response = await fetch("/api/stripe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          plan: planName,
+          userEmail: userData.email,
+        }),
       });
-    } catch (error) {
+
+      const { sessionId, error } = await response.json();
+
+      if (error) {
+        throw new Error(error);
+      }
+
+      // Redirect to Stripe Checkout
+      const stripe = await getStripe();
+      const { error: stripeError } = await stripe.redirectToCheckout({
+        sessionId,
+      });
+
+      if (stripeError) {
+        throw new Error(stripeError.message);
+      }
+    } catch (err) {
       toast({
         title: "Error",
-        description: "Failed to purchase credits",
+        description:
+          err instanceof Error ? err.message : "Failed to purchase credits",
         variant: "destructive",
       });
     } finally {
@@ -152,13 +201,27 @@ export default function PricingPage() {
             <Button
               className="w-full"
               disabled={loading}
-              onClick={() => handlePurchase(plan.credits)}
+              onClick={() => handlePurchase(plan.name)}
             >
-              {loading ? "Processing..." : "Purchase Now"}
+              {loading ? "Processing..." : `Purchase ${plan.credits} Credits`}
             </Button>
           </div>
         ))}
       </div>
     </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-16 text-center">
+          Loading...
+        </div>
+      }
+    >
+      <PricingPageContent />
+    </Suspense>
   );
 }
