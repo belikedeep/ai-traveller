@@ -164,6 +164,10 @@ export default function CreateTripPage() {
             credits: updatedUser.credits,
           };
           localStorage.setItem("user", JSON.stringify(updatedLocalUser));
+
+          // Create a custom event to notify about credit update
+          const creditUpdateEvent = new Event("creditUpdate");
+          window.dispatchEvent(creditUpdateEvent);
         }
       }
     }

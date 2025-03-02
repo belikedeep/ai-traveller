@@ -19,6 +19,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { initializeUser, getUser } from "@/service/UserService";
 import type { User } from "@/service/UserService";
 
@@ -33,35 +34,49 @@ interface TokenInfo {
 export default function Header() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const router = useRouter();
+
+  const checkUserAndCredits = async () => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      // Get latest credits from Firestore
+      const firestoreUser = await getUser(parsedUser.email);
+      if (firestoreUser) {
+        const updatedUser = { ...parsedUser, credits: firestoreUser.credits };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setUser(updatedUser);
+      } else {
+        setUser(parsedUser);
+      }
+    }
+  };
 
   useEffect(() => {
-    const checkUserAndCredits = async () => {
-      const userData = localStorage.getItem("user");
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        // Get latest credits from Firestore
-        const firestoreUser = await getUser(parsedUser.email);
-        if (firestoreUser) {
-          const updatedUser = { ...parsedUser, credits: firestoreUser.credits };
-          localStorage.setItem("user", JSON.stringify(updatedUser));
-          setUser(updatedUser);
-        } else {
-          setUser(parsedUser);
-        }
-      }
-    };
-
     checkUserAndCredits();
 
-    // Listen for storage changes
+    // Set up periodic credit check
+    const creditCheckInterval = setInterval(checkUserAndCredits, 10000); // Check every 10 seconds
+
+    // Listen for storage changes and credit updates
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "user" && e.newValue) {
         setUser(JSON.parse(e.newValue));
       }
     };
 
+    const handleCreditUpdate = () => {
+      checkUserAndCredits();
+    };
+
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    window.addEventListener("creditUpdate", handleCreditUpdate);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("creditUpdate", handleCreditUpdate);
+      clearInterval(creditCheckInterval);
+    };
   }, []);
 
   const login = useGoogleLogin({
@@ -105,11 +120,7 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
-    window.location.href = "/";
-  };
-
-  const handleNavigation = (path: string) => {
-    window.location.href = path;
+    router.push("/");
   };
 
   return (
@@ -131,26 +142,27 @@ export default function Header() {
         <nav className="flex items-center gap-6">
           {user ? (
             <div className="flex items-center gap-4">
-              <Button
-                onClick={() => handleNavigation("/pricing")}
-                variant="outline"
-                className="text-foreground hover:bg-accent transition-colors duration-200"
-              >
-                💰 {user.credits ?? 0} Credits
-              </Button>
-              <Button
-                onClick={() => handleNavigation("/create-trip")}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-indigo-600/40"
-              >
-                ✨ Create Trip
-              </Button>
-              <Button
-                onClick={() => handleNavigation("/my-trips")}
-                variant="ghost"
-                className="text-foreground hover:bg-accent transition-colors duration-200"
-              >
-                My Trips
-              </Button>
+              <Link href="/pricing">
+                <Button
+                  variant="outline"
+                  className="text-foreground hover:bg-accent transition-colors duration-200"
+                >
+                  💰 {user.credits ?? 0} Credits
+                </Button>
+              </Link>
+              <Link href="/create-trip">
+                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-indigo-600/40">
+                  ✨ Create Trip
+                </Button>
+              </Link>
+              <Link href="/my-trips">
+                <Button
+                  variant="ghost"
+                  className="text-foreground hover:bg-accent transition-colors duration-200"
+                >
+                  My Trips
+                </Button>
+              </Link>
               <Popover>
                 <PopoverTrigger>
                   <div className="relative group">
