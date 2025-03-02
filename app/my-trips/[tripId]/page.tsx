@@ -6,6 +6,7 @@ import { db } from "@/service/FirebaseConfig";
 import InfoSection from "@/components/trip/InfoSection";
 import Hotels from "@/components/trip/Hotels";
 import PlacesToVisit from "@/components/trip/PlacesToVisit";
+import { Loader2 } from "lucide-react";
 
 interface TripData {
   userSelection: {
@@ -71,18 +72,25 @@ export default function ViewTripPage({
 
   if (!trip) {
     return (
-      <div className="flex justify-center items-center h-96">Loading...</div>
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <p className="text-muted-foreground">Loading your trip details...</p>
+      </div>
     );
   }
 
   return (
-    <div className="p-10 md:px-20 lg:px-40 xl:px-56">
-      <InfoSection trip={trip} />
-      <div className="mt-10">
-        <Hotels trip={trip} />
-      </div>
-      <div className="mt-10">
-        <PlacesToVisit trip={trip} />
+    <div className="relative">
+      {/* Background decorations */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-indigo-500/5 to-background -z-10" />
+      <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
+
+      <div className="container mx-auto px-4 py-8 md:py-12 lg:py-16">
+        <div className="space-y-12">
+          <InfoSection trip={trip} />
+          <Hotels trip={trip} />
+          <PlacesToVisit trip={trip} />
+        </div>
       </div>
     </div>
   );

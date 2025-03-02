@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { GetPlaceDetails, GetPlacePhoto } from "@/service/GlobalAPI";
 import Image from "next/image";
 import { useEffect, useState, useCallback, memo } from "react";
+import { Share2, MapPin, Calendar, Wallet2, Users } from "lucide-react";
 
 interface TripProps {
   trip: {
@@ -18,10 +19,9 @@ interface TripProps {
   };
 }
 
-import { useMemo } from "react";
-
 function InfoSection({ trip }: TripProps) {
   const [photoUrl, setPhotoUrl] = useState("/placeholder.jpg");
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchPlacePhoto = useCallback(async () => {
     try {
@@ -38,6 +38,8 @@ function InfoSection({ trip }: TripProps) {
       }
     } catch (error) {
       console.error("Error fetching place photo:", error);
+    } finally {
+      setIsLoading(false);
     }
   }, [trip?.userSelection.location.label]);
 
@@ -47,37 +49,51 @@ function InfoSection({ trip }: TripProps) {
     }
   }, [trip?.userSelection.location.label, fetchPlacePhoto]);
 
-  const memoizedTrip = useMemo(() => trip, [trip]);
-
   return (
-    <div>
-      <Image
-        width={150}
-        height={150}
-        src={photoUrl}
-        alt={trip?.userSelection.location.label || "trip"}
-        className="h-[340px] w-full object-cover rounded"
-      />
+    <div className="rounded-2xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50">
+      <div className="relative h-[400px] w-full">
+        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10" />
+        {isLoading ? (
+          <div className="absolute inset-0 bg-background animate-pulse" />
+        ) : (
+          <Image
+            src={photoUrl}
+            alt={trip?.userSelection.location.label || "trip"}
+            fill
+            className="object-cover transition-all duration-500"
+            priority
+          />
+        )}
+      </div>
 
-      <div className="flex justify-between items-center">
-        <div className="my-5 flex flex-col gap-2">
-          <h2 className="text-lg text-gray-500 mt-1">
-            {memoizedTrip?.userSelection.location.label}
-          </h2>
-          <div className="flex gap-2">
-            <h2 className="p-1 px-3 bg-gray-200 rounded-full">
-              {memoizedTrip?.userSelection?.noOfDays} Day
-            </h2>
-            <h2 className="p-1 px-3 bg-gray-200 rounded-full">
-              {memoizedTrip?.userSelection?.budget} Budget
-            </h2>
-            <h2 className="p-1 px-3 bg-gray-200 rounded-full">
-              No. of travelers: {memoizedTrip?.userSelection?.travellingWith}
-            </h2>
+      <div className="p-6 relative z-20 -mt-20">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-lg text-muted-foreground">
+              <MapPin className="h-5 w-5 text-indigo-500" />
+              <span>{trip?.userSelection.location.label}</span>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-sm">
+                <Calendar className="h-4 w-4 text-indigo-500" />
+                <span>{trip?.userSelection.noOfDays} Days</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-sm">
+                <Wallet2 className="h-4 w-4 text-indigo-500" />
+                <span>{trip?.userSelection.budget} Budget</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-sm">
+                <Users className="h-4 w-4 text-indigo-500" />
+                <span>{trip?.userSelection.travellingWith} Travelers</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <Button>Share</Button>
+          <Button variant="outline" size="lg" className="w-full md:w-auto">
+            <Share2 className="mr-2 h-4 w-4" />
+            Share Trip
+          </Button>
+        </div>
       </div>
     </div>
   );

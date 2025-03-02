@@ -1,10 +1,17 @@
 "use client";
 
-/* eslint-disable react-hooks/exhaustive-deps */
 import Link from "next/link";
-import { useEffect, useState, useCallback, memo } from "react";
+import { useEffect, useState, useCallback, memo, useMemo } from "react";
 import { GetPlaceDetails, GetPlacePhoto } from "@/service/GlobalAPI";
 import Image from "next/image";
+import {
+  CalendarDays,
+  Clock,
+  Star,
+  MapPin,
+  ArrowUpRight,
+  Loader2,
+} from "lucide-react";
 
 interface Place {
   placeName: string;
@@ -32,22 +39,23 @@ interface TripProps {
   };
 }
 
-import { useMemo } from "react";
-
 function PlacesToVisit({ trip }: TripProps) {
   const [placePhotos, setPlacePhotos] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  // Convert itinerary object to array
   const memoizedTrip = useMemo(() => trip, [trip]);
   const memoizedItinerary = useMemo(
     () => memoizedTrip?.tripData?.itinerary || {},
     [memoizedTrip?.tripData?.itinerary]
   );
-  const memoizedDays = useMemo(
-    () => Object.entries(memoizedTrip?.tripData?.itinerary || {}),
-    [memoizedTrip]
-  );
+  const memoizedDays = useMemo(() => {
+    const days = Object.entries(memoizedTrip?.tripData?.itinerary || {});
+    return days.sort((a, b) => {
+      const dayNumA = parseInt(a[0].replace("Day ", ""));
+      const dayNumB = parseInt(b[0].replace("Day ", ""));
+      return dayNumA - dayNumB;
+    });
+  }, [memoizedTrip]);
 
   const fetchPlacePhotos = useCallback(async () => {
     setLoading(true);
@@ -83,53 +91,93 @@ function PlacesToVisit({ trip }: TripProps) {
 
   return (
     <div>
-      <h2 className="text-xl font-bold">Places to Visit</h2>
+      <div className="flex items-center gap-2 mb-8">
+        <h2 className="text-2xl font-semibold bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+          Your Travel Itinerary
+        </h2>
+        {loading && (
+          <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
+        )}
+      </div>
 
-      <div>
-        {memoizedDays.map(([dayKey, dayData]) => (
+      <div className="space-y-8">
+        {memoizedDays.map(([dayKey, dayData]: [string, DayData]) => (
           <div
             key={dayKey}
-            className="p-4 border rounded-lg hover:shadow-md mb-4"
+            className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50"
           >
-            <h3 className="text-xl font-bold mb-2">{dayKey}</h3>
-            <p className="text-md mb-2">Theme: {dayData.theme}</p>
-            <p className="text-sm mb-4">
-              Best Time: {dayData.best_time_to_visit}
-            </p>
+            <div className="p-6 border-b border-border/50 space-y-4">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-indigo-500" />
+                <h3 className="text-xl font-semibold">{dayKey}</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-indigo-500" />
+                  <span>Theme: {dayData.theme}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-indigo-500" />
+                  <span>Best Time: {dayData.best_time_to_visit}</span>
+                </div>
+              </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {dayData.places.map((place, index) => (
-                <Link
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+              {dayData.places.map((place: Place, index: number) => (
+                <div
                   key={index}
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                    place.placeName
-                  )}`}
-                  target="_blank"
+                  className="group-hover:transform group-hover:scale-[1.02] transition-transform duration-300"
                 >
-                  <div
-                    className={`border p-3 rounded hover:shadow-md transition ${
-                      loading ? "animate-pulse" : ""
-                    }`}
+                  <Link
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      place.placeName
+                    )}`}
+                    target="_blank"
+                    className="block group"
                   >
-                    <Image
-                      width={150}
-                      height={150}
-                      src={placePhotos[place.placeName] || "/placeholder.jpg"}
-                      alt={place.placeName}
-                      className="w-full h-48 object-cover rounded mb-2"
-                    />
-                    <h4 className="font-bold text-lg">{place.placeName}</h4>
-                    <p className="text-sm text-gray-600 mb-1">
-                      {place.placeDetails}
-                    </p>
-                    <p className="text-sm font-medium">
-                      Rating: {place.rating}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Travel Time: {place.travelTime}
-                    </p>
-                  </div>
-                </Link>
+                    <div className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-indigo-500/10">
+                      <div className="relative aspect-video">
+                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent z-10" />
+                        {loading ? (
+                          <div className="absolute inset-0 bg-background animate-pulse" />
+                        ) : (
+                          <Image
+                            src={
+                              placePhotos[place.placeName] || "/placeholder.jpg"
+                            }
+                            alt={place.placeName}
+                            fill
+                            className="object-cover transition-all duration-500 group-hover:scale-110"
+                          />
+                        )}
+                        <div className="absolute top-3 right-3 z-20">
+                          <div className="flex items-center gap-1 text-sm bg-background/90 px-2 py-1 rounded-full backdrop-blur-sm border border-border/50">
+                            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                            <span>{place.rating}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className="font-semibold line-clamp-1 group-hover:text-indigo-400 transition-colors">
+                            {place.placeName}
+                          </h4>
+                          <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        </div>
+                        <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
+                          <p className="line-clamp-2">{place.placeDetails}</p>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                          <Clock className="h-4 w-4" />
+                          <span>{place.travelTime}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
               ))}
             </div>
           </div>

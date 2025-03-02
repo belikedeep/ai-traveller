@@ -21,6 +21,9 @@ import {
 } from "@/components/ui/dialog";
 import { FcGoogle } from "react-icons/fc";
 import { useGoogleLogin } from "@react-oauth/google";
+import { MdLocationOn, MdCalendarMonth } from "react-icons/md";
+import { FaMoneyBillWave, FaUsers, FaPlaneDeparture } from "react-icons/fa";
+import { Loader2 } from "lucide-react";
 import axios from "axios";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/service/FirebaseConfig";
@@ -30,6 +33,7 @@ import {
   getUser,
   CREDIT_COSTS,
 } from "@/service/UserService";
+
 interface GooglePlaceData {
   label: string;
   value: {
@@ -66,6 +70,8 @@ export default function CreateTripPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState<FormData>({});
   const [loading, setLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 4;
 
   const router = useRouter();
 
@@ -74,7 +80,8 @@ export default function CreateTripPage() {
     value: string | number | GooglePlaceData
   ) => {
     if (name === "noOfDays" && Number(value) > 5) {
-      return alert("You can't plan a trip for more than 5 days");
+      toast.error("You can't plan a trip for more than 5 days");
+      return;
     }
     setFormData({
       ...formData,
@@ -90,7 +97,7 @@ export default function CreateTripPage() {
     onSuccess: (response) => GetUserProfile(response as TokenInfo),
     onError: (error) => {
       console.error("Login Failed:", error);
-      toast("Login failed. Please try again.");
+      toast.error("Login failed. Please try again.");
     },
     scope: "email profile",
   });
@@ -112,7 +119,7 @@ export default function CreateTripPage() {
         !firestoreUser ||
         firestoreUser.credits < CREDIT_COSTS.TRIP_CREATION
       ) {
-        toast(
+        toast.error(
           "Insufficient credits. Please purchase more credits to create a trip."
         );
         router.push("/pricing");
@@ -125,7 +132,7 @@ export default function CreateTripPage() {
         !formData?.budget ||
         !formData?.travellingWith
       ) {
-        toast("Please fill all the fields");
+        toast.error("Please fill all the fields");
         return;
       }
 
@@ -196,112 +203,332 @@ export default function CreateTripPage() {
       })
       .catch((err: Error) => {
         console.error("Error fetching user profile:", err);
-        toast("Failed to get user profile. Please try again.");
+        toast.error("Failed to get user profile. Please try again.");
       });
   };
 
+  const nextStep = () => {
+    if (currentStep === 1 && !formData.location) {
+      toast.error("Please select a destination");
+      return;
+    }
+    if (currentStep === 2 && !formData.noOfDays) {
+      toast.error("Please enter number of days");
+      return;
+    }
+    if (currentStep === 3 && !formData.budget) {
+      toast.error("Please select a budget");
+      return;
+    }
+
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const renderProgressBar = () => {
+    return (
+      <div className="w-full bg-background/50 rounded-full h-2.5 mb-10">
+        <div
+          className="bg-gradient-to-r from-indigo-600 to-indigo-400 h-2.5 rounded-full transition-all duration-500 ease-in-out"
+          style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+        ></div>
+      </div>
+    );
+  };
+
+  const customSelectStyles: {
+    [key: string]: (
+      base: React.CSSProperties,
+      state?: { isSelected?: boolean; isFocused?: boolean }
+    ) => React.CSSProperties;
+  } = {
+    control: (provided) => ({
+      ...provided,
+      backgroundColor: "hsl(var(--background))",
+      borderColor: "hsl(var(--border))",
+      color: "hsl(var(--foreground))",
+      boxShadow: "none",
+      "&:hover": {
+        borderColor: "hsl(var(--border))",
+      },
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: "hsl(var(--background))",
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state?.isSelected
+        ? "hsl(var(--primary))"
+        : state?.isFocused
+        ? "hsl(var(--accent))"
+        : "hsl(var(--background))",
+      color: state?.isSelected
+        ? "hsl(var(--primary-foreground))"
+        : "hsl(var(--foreground))",
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: "hsl(var(--foreground))",
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: "hsl(var(--foreground))",
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: "hsl(var(--muted-foreground))",
+    }),
+  };
+
   return (
-    <div className="sm:px-10 md:px-32 lg:px-56 xl:px-72 px-5 my-10">
-      <h2 className="font-bold text-4xl">Tell us about your trip</h2>
-      <p className="mt-3 text-lg">
-        Just provide some basic information about your trip and we&apos;ll take
-      </p>
+    <div className="min-h-[calc(100vh-4rem)] py-10 px-4 md:px-0 flex flex-col">
+      <div className="max-w-4xl mx-auto flex-1 flex flex-col gap-8">
+        <div className="rounded-2xl border border-border/50 backdrop-blur-sm bg-background/50 p-8 shadow-xl">
+          <div className="mb-8">
+            <h2 className="font-bold text-4xl bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+              Plan Your Dream Journey
+            </h2>
+            <p className="mt-3 text-lg text-muted-foreground">
+              Let AI create a personalized itinerary just for you
+            </p>
+            {renderProgressBar()}
+          </div>
 
-      <div className="mt-10 flex flex-col gap-10">
-        <div>
-          <h2 className="text-xl my-3 font-medium">
-            What is destination of choice?
-          </h2>
-          <GooglePlacesAutocomplete
-            apiKey={process.env.NEXT_PUBLIC_GOOGLE_PLACE_API_KEY}
-            selectProps={{
-              value: place,
-              onChange: (newValue: SingleValue<GooglePlaceData>) => {
-                if (newValue) {
-                  const placeData: GooglePlaceData = {
-                    label: newValue.label,
-                    value: newValue.value,
-                  };
-                  setPlace(placeData);
-                  handleInputChange("location", placeData);
-                }
-              },
-            }}
-          />
-        </div>
-
-        <div>
-          <h2 className="text-xl my-3 font-medium">
-            How many days are you planning your trip?
-          </h2>
-          <Input
-            placeholder={"Ex.3"}
-            type="number"
-            onChange={(e) =>
-              handleInputChange("noOfDays", parseInt(e.target.value))
-            }
-          />
-        </div>
-      </div>
-
-      <div>
-        <h2 className="text-xl my-3 font-medium">What is your budget?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
-          {SelectBudgetOptions.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => handleInputChange("budget", item.title)}
-              className={`p-4 border rounded-lg hover:shadow-md ${
-                formData?.budget === item.title && "shadow-lg border-black"
-              }`}
-            >
-              <h2 className="text-4xl">{item.icon}</h2>
-              <h2 className="font-bold text-lg">{item.title}</h2>
-              <h2 className="text-sm text-gray-500">{item.desc}</h2>
+          {currentStep === 1 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex items-center gap-3 mb-2">
+                <MdLocationOn className="text-2xl text-indigo-500" />
+                <h2 className="text-xl font-medium">
+                  Where do you want to go?
+                </h2>
+              </div>
+              <div className="rounded-lg ring-1 ring-border/50">
+                <GooglePlacesAutocomplete
+                  apiKey={process.env.NEXT_PUBLIC_GOOGLE_PLACE_API_KEY}
+                  selectProps={{
+                    value: place,
+                    onChange: (newValue: SingleValue<GooglePlaceData>) => {
+                      if (newValue) {
+                        const placeData: GooglePlaceData = {
+                          label: newValue.label,
+                          value: newValue.value,
+                        };
+                        setPlace(placeData);
+                        handleInputChange("location", placeData);
+                      }
+                    },
+                    styles: customSelectStyles,
+                    placeholder: "Search for a destination...",
+                  }}
+                />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <span>Try popular destinations like Paris, Bali, or Tokyo</span>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+          )}
 
-      <div>
-        <h2 className="text-xl my-3 font-medium">
-          What do you plan on travelling with on your next adventure?
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
-          {SelectedTravelsList.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => handleInputChange("travellingWith", item.people)}
-              className={`p-4 border rounded-lg hover:shadow-md ${
-                formData?.travellingWith === item.people &&
-                "shadow-lg border-black"
-              }`}
-            >
-              <h2 className="text-4xl">{item.icon}</h2>
-              <h2 className="font-bold text-lg">{item.title}</h2>
-              <h2 className="text-sm text-gray-500">{item.desc}</h2>
+          {currentStep === 2 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex items-center gap-3 mb-2">
+                <MdCalendarMonth className="text-2xl text-indigo-500" />
+                <h2 className="text-xl font-medium">
+                  How many days will you stay?
+                </h2>
+              </div>
+              <div>
+                <Input
+                  placeholder="Number of days (max 5)"
+                  type="number"
+                  min="1"
+                  max="5"
+                  value={formData.noOfDays || ""}
+                  onChange={(e) =>
+                    handleInputChange("noOfDays", parseInt(e.target.value))
+                  }
+                  className="text-lg"
+                />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <p>
+                  We recommend 3-5 days to fully experience most destinations
+                </p>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+          )}
 
-      <div className="flex justify-end mt-10">
-        <Button disabled={loading} onClick={OnGenerateTrip}>
-          {loading ? "Loading..." : "Generate Plan"}
-        </Button>
+          {currentStep === 3 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex items-center gap-3 mb-2">
+                <FaMoneyBillWave className="text-2xl text-indigo-500" />
+                <h2 className="text-xl font-medium">
+                  What&apos;s your budget?
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {SelectBudgetOptions.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => handleInputChange("budget", item.title)}
+                    className={`p-5 border rounded-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] ${
+                      formData?.budget === item.title
+                        ? "bg-gradient-to-b from-indigo-500/10 via-background to-background border-indigo-500 shadow-lg shadow-indigo-500/20"
+                        : "border-border/50 bg-background/50 hover:border-border"
+                    }`}
+                  >
+                    <div className="text-4xl mb-3 text-indigo-500">
+                      {item.icon}
+                    </div>
+                    <h2 className="font-bold text-lg">{item.title}</h2>
+                    <h2 className="text-sm text-muted-foreground">
+                      {item.desc}
+                    </h2>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {currentStep === 4 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex items-center gap-3 mb-2">
+                <FaUsers className="text-2xl text-indigo-500" />
+                <h2 className="text-xl font-medium">
+                  Who are you traveling with?
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {SelectedTravelsList.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() =>
+                      handleInputChange("travellingWith", item.people)
+                    }
+                    className={`p-5 border rounded-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] ${
+                      formData?.travellingWith === item.people
+                        ? "bg-gradient-to-b from-indigo-500/10 via-background to-background border-indigo-500 shadow-lg shadow-indigo-500/20"
+                        : "border-border/50 bg-background/50 hover:border-border"
+                    }`}
+                  >
+                    <div className="text-4xl mb-3 text-indigo-500">
+                      {item.icon}
+                    </div>
+                    <h2 className="font-bold text-lg">{item.title}</h2>
+                    <h2 className="text-sm text-muted-foreground">
+                      {item.desc}
+                    </h2>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between mt-10">
+            {currentStep > 1 ? (
+              <Button variant="outline" onClick={prevStep}>
+                Back
+              </Button>
+            ) : (
+              <div></div>
+            )}
+
+            {currentStep < totalSteps ? (
+              <Button variant="default" onClick={nextStep}>
+                Continue
+              </Button>
+            ) : (
+              <Button
+                disabled={loading}
+                variant="premium"
+                onClick={OnGenerateTrip}
+                className="flex items-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Creating your perfect trip...
+                  </>
+                ) : (
+                  <>
+                    <FaPlaneDeparture />
+                    Generate My Trip Plan
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Summary card that shows selected options */}
+        {Object.keys(formData).length > 0 && (
+          <div className="mt-8 rounded-2xl border border-border/50 backdrop-blur-sm bg-background/50 p-6 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h3 className="text-xl font-medium mb-4">Your Trip Summary</h3>
+            <div className="space-y-3">
+              {formData.location && (
+                <div className="flex items-center gap-3">
+                  <MdLocationOn className="text-indigo-500" />
+                  <span className="text-muted-foreground">
+                    Destination:{" "}
+                    <span className="text-foreground">
+                      {formData.location.label}
+                    </span>
+                  </span>
+                </div>
+              )}
+              {formData.noOfDays && (
+                <div className="flex items-center gap-3">
+                  <MdCalendarMonth className="text-indigo-500" />
+                  <span className="text-muted-foreground">
+                    Duration:{" "}
+                    <span className="text-foreground">
+                      {formData.noOfDays} day{formData.noOfDays > 1 ? "s" : ""}
+                    </span>
+                  </span>
+                </div>
+              )}
+              {formData.budget && (
+                <div className="flex items-center gap-3">
+                  <FaMoneyBillWave className="text-indigo-500" />
+                  <span className="text-muted-foreground">
+                    Budget:{" "}
+                    <span className="text-foreground">{formData.budget}</span>
+                  </span>
+                </div>
+              )}
+              {formData.travellingWith && (
+                <div className="flex items-center gap-3">
+                  <FaUsers className="text-indigo-500" />
+                  <span className="text-muted-foreground">
+                    Traveling with:{" "}
+                    <span className="text-foreground">
+                      {formData.travellingWith}
+                    </span>
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent>
+        <DialogContent className="bg-background/95 backdrop-blur-sm border-border/50">
           <DialogHeader>
-            {/* <Image src="/logo.svg" alt="Logo" width={24} /> */}
-            <DialogTitle>Sign in with Google</DialogTitle>
-            <DialogDescription>
-              <p>Sign in to the App with Google authentication securely</p>
+            <DialogTitle className="text-2xl">Sign in with Google</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              <p>Sign in to create and save your trip plans</p>
 
               <Button
                 onClick={() => login()}
-                className="w-full mt-5 flex gap-4 items-center"
+                className="w-full mt-5 flex gap-4 items-center bg-background hover:bg-accent text-foreground"
               >
                 <FcGoogle className="h-7 w-7" />
                 Sign in with Google

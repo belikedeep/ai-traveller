@@ -29,15 +29,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased dark min-h-screen bg-gradient-to-b from-background via-background/95 to-background/90`}
       >
         <GoogleOAuthProvider
           clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "dummy-id"}
         >
-          <Header />
-          {children}
-          <Toaster />
-          <Footer />
+          <div className="relative min-h-screen">
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-background via-indigo-900/5 to-background -z-10" />
+
+            <Header />
+            <main className="relative">{children}</main>
+            <Toaster position="bottom-right" />
+            <Footer />
+          </div>
         </GoogleOAuthProvider>
       </body>
     </html>

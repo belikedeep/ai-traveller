@@ -6,6 +6,7 @@ import { useEffect, useState, Suspense, type ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "next/navigation";
 import { STRIPE_PLANS } from "@/lib/stripe";
+import { Loader2 } from "lucide-react";
 
 const PRICING_PLANS = [
   {
@@ -28,6 +29,7 @@ const PRICING_PLANS = [
       "Priority Support",
       "Custom Modifications",
     ],
+    popular: true,
   },
   {
     name: "PREMIUM",
@@ -45,6 +47,7 @@ const PRICING_PLANS = [
 
 function PricingPageContent(): ReactNode {
   const [loading, setLoading] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const { toast } = useToast();
   const [userData, setUserData] = useState<{
     name: string;
@@ -62,7 +65,7 @@ function PricingPageContent(): ReactNode {
     } else {
       window.location.href = "/";
     }
-  }, []); // Only run on mount
+  }, []);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -85,7 +88,7 @@ function PricingPageContent(): ReactNode {
           setUserData(updatedUserData);
 
           toast({
-            title: "Payment Successful!",
+            title: "Payment Successful! 🎉",
             description: `Your account has been credited with ${newCredits} credits.`,
           });
         }
@@ -99,7 +102,6 @@ function PricingPageContent(): ReactNode {
         });
       }
 
-      // Clean up URL parameters using history API instead of router
       if (isSubscribed) {
         window.history.replaceState({}, "", "/pricing");
       }
@@ -116,8 +118,8 @@ function PricingPageContent(): ReactNode {
     if (!userData) return;
 
     setLoading(true);
+    setSelectedPlan(planName);
     try {
-      // Create Checkout Session
       const response = await fetch("/api/stripe", {
         method: "POST",
         headers: {
@@ -135,7 +137,6 @@ function PricingPageContent(): ReactNode {
         throw new Error(error);
       }
 
-      // Redirect to Stripe Checkout
       const stripe = await getStripe();
       const { error: stripeError } = await stripe.redirectToCheckout({
         sessionId,
@@ -153,6 +154,7 @@ function PricingPageContent(): ReactNode {
       });
     } finally {
       setLoading(false);
+      setSelectedPlan(null);
     }
   };
 
@@ -161,11 +163,14 @@ function PricingPageContent(): ReactNode {
   }
 
   return (
-    <div className="container mx-auto px-4 py-16">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
-        <p className="text-gray-600">
-          Select the perfect plan for your travel needs
+    <div className="container mx-auto px-4 py-20">
+      <div className="text-center mb-16 space-y-4">
+        <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+          Choose Your Plan
+        </h1>
+        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          Unlock the full potential of AI-powered travel planning with our
+          flexible pricing options
         </p>
       </div>
 
@@ -173,40 +178,81 @@ function PricingPageContent(): ReactNode {
         {PRICING_PLANS.map((plan) => (
           <div
             key={plan.name}
-            className="border rounded-lg p-8 hover:shadow-lg transition-shadow"
+            className={`relative overflow-hidden rounded-2xl border border-border/50 backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl ${
+              plan.popular
+                ? "bg-gradient-to-b from-indigo-500/10 via-background to-background ring-2 ring-indigo-500"
+                : "bg-background/50"
+            }`}
           >
-            <h2 className="text-2xl font-bold mb-4">{plan.name}</h2>
-            <p className="text-4xl font-bold mb-6">{plan.price}</p>
-            <p className="text-gray-600 mb-6">{plan.credits} Credits</p>
-            <ul className="space-y-3 mb-8">
-              {plan.features.map((feature) => (
-                <li key={feature} className="flex items-center">
-                  <svg
-                    className="w-5 h-5 text-green-500 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            <Button
-              className="w-full"
-              disabled={loading}
-              onClick={() => handlePurchase(plan.name)}
-            >
-              {loading ? "Processing..." : `Purchase ${plan.credits} Credits`}
-            </Button>
+            {plan.popular && (
+              <div className="absolute top-0 right-0">
+                <div className="bg-indigo-600 text-white text-xs px-3 py-1 rounded-bl-lg">
+                  Most Popular
+                </div>
+              </div>
+            )}
+            <div className="p-8">
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold mb-4">{plan.name}</h2>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-5xl font-bold">{plan.price}</p>
+                  <span className="text-muted-foreground">/one-time</span>
+                </div>
+                <p className="text-muted-foreground mt-2">
+                  {plan.credits} Credits
+                </p>
+              </div>
+              <ul className="space-y-4 mb-8">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <svg
+                      className={`w-5 h-5 ${
+                        plan.popular ? "text-indigo-500" : "text-green-500"
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-muted-foreground">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <Button
+                className="w-full"
+                disabled={loading}
+                onClick={() => handlePurchase(plan.name)}
+                variant={plan.popular ? "premium" : "default"}
+                size="lg"
+              >
+                {loading && selectedPlan === plan.name ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Processing...
+                  </div>
+                ) : (
+                  `Purchase ${plan.credits} Credits`
+                )}
+              </Button>
+            </div>
           </div>
         ))}
+      </div>
+
+      <div className="mt-16 text-center">
+        <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
+          All plans include access to our AI travel planning features. Credits
+          never expire. Need a custom plan?{" "}
+          <button className="text-indigo-500 hover:underline">
+            Contact us
+          </button>
+        </p>
       </div>
     </div>
   );
@@ -216,8 +262,9 @@ export default function PricingPage() {
   return (
     <Suspense
       fallback={
-        <div className="container mx-auto px-4 py-16 text-center">
-          Loading...
+        <div className="container mx-auto px-4 py-20 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="text-muted-foreground mt-4">Loading pricing plans...</p>
         </div>
       }
     >

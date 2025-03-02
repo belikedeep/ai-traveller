@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/service/FirebaseConfig";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { CalendarDays, Loader2, Map, Plus, Users, Wallet } from "lucide-react";
+import Link from "next/link";
 
 interface TripUserSelection {
   location: {
@@ -48,7 +51,6 @@ export default function MyTripsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Move localStorage access to useEffect to avoid SSR issues
     const userData = localStorage.getItem("user");
     if (userData) {
       setUser(JSON.parse(userData));
@@ -84,45 +86,105 @@ export default function MyTripsPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-96">Loading...</div>
+      <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <p className="text-muted-foreground">Loading your adventures...</p>
+      </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex justify-center items-center h-96">
-        Please login to view your trips
+      <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-6">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-semibold">Welcome to TripAI</h2>
+          <p className="text-muted-foreground">
+            Please sign in to view your trips
+          </p>
+        </div>
+        <Button onClick={() => router.push("/")}>Sign In</Button>
       </div>
     );
   }
 
   if (trips.length === 0) {
     return (
-      <div className="flex justify-center items-center h-96">
-        You haven&apos;t created any trips yet
+      <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-6">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-semibold">No trips yet</h2>
+          <p className="text-muted-foreground">
+            Start planning your next adventure!
+          </p>
+        </div>
+        <Link href="/create-trip">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Create New Trip
+          </Button>
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">My Trips</h1>
+    <div className="container mx-auto py-12 px-4">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-semibold bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+          My Trips
+        </h1>
+        <Link href="/create-trip">
+          <Button variant="default" size="lg" className="gap-2">
+            <Plus className="h-4 w-4" />
+            New Trip
+          </Button>
+        </Link>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {trips.map((trip) => (
           <div
             key={trip.id}
-            className="border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => router.push(`/my-trips/${trip.id}`)}
+            className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/10 cursor-pointer group"
           >
-            <h2 className="text-xl font-semibold mb-2">
-              {trip.userSelection.location.label}
-            </h2>
-            <p className="text-gray-600">
-              {trip.userSelection.noOfDays} days • {trip.userSelection.budget}
-            </p>
-            <p className="text-gray-500 mt-2">
-              Traveling with: {trip.userSelection.travellingWith}
-            </p>
+            <div className="p-6 space-y-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-lg font-medium group-hover:text-indigo-400 transition-colors">
+                    <Map className="h-5 w-5" />
+                    {trip.userSelection.location.label}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 pt-2">
+                <div className="space-y-1">
+                  <div className="text-muted-foreground text-sm flex items-center gap-1.5">
+                    <CalendarDays className="h-4 w-4" />
+                    Duration
+                  </div>
+                  <p className="font-medium">
+                    {trip.userSelection.noOfDays} days
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-muted-foreground text-sm flex items-center gap-1.5">
+                    <Wallet className="h-4 w-4" />
+                    Budget
+                  </div>
+                  <p className="font-medium">{trip.userSelection.budget}</p>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-muted-foreground text-sm flex items-center gap-1.5">
+                    <Users className="h-4 w-4" />
+                    Group
+                  </div>
+                  <p className="font-medium">
+                    {trip.userSelection.travellingWith}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>

@@ -3,63 +3,134 @@ import Link from "next/link";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white py-12">
-      <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Plane className="h-6 w-6 text-red-500" />
-              <h3 className="text-xl font-bold">TripAI</h3>
-            </div>
-            <p className="text-gray-400">
-              Making travel planning smarter, faster, and more personalized.
+    <footer className="bg-background/50 border-t border-border/40">
+      <div className="container mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="space-y-4">
+            <Link href="/" className="flex items-center group">
+              <Plane className="h-6 w-6 text-indigo-600 mr-2 transition-transform duration-200 group-hover:translate-x-1" />
+              <span className="text-foreground font-bold text-lg">TripAI</span>
+            </Link>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Making travel planning smarter, faster, and more personalized with
+              AI-powered insights. 🌍
             </p>
           </div>
-          <div>
-            <h4 className="font-semibold mb-4">Product</h4>
-            <ul className="space-y-2 text-gray-400">
+
+          <div className="space-y-4">
+            <h4 className="text-foreground font-semibold">Product 🚀</h4>
+            <ul className="space-y-3">
               <li>
-                <Link href="#features">Features</Link>
+                <Link
+                  href="#features"
+                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    Features ✨
+                  </span>
+                </Link>
               </li>
               <li>
-                <Link href="#pricing">Pricing</Link>
+                <Link
+                  href="#pricing"
+                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    Pricing 💰
+                  </span>
+                </Link>
               </li>
               <li>
-                <Link href="/api-docs">API</Link>
+                <Link
+                  href="/api-docs"
+                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    API 💻
+                  </span>
+                </Link>
               </li>
             </ul>
           </div>
-          <div>
-            <h4 className="font-semibold mb-4">Company</h4>
-            <ul className="space-y-2 text-gray-400">
+
+          <div className="space-y-4">
+            <h4 className="text-foreground font-semibold">Company 🏢</h4>
+            <ul className="space-y-3">
               <li>
-                <Link href="/about">About</Link>
+                <Link
+                  href="/about"
+                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    About Us 🧑‍💼
+                  </span>
+                </Link>
               </li>
               <li>
-                <Link href="/blog">Blog</Link>
+                <Link
+                  href="/blog"
+                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    Blog 📰
+                  </span>
+                </Link>
               </li>
               <li>
-                <Link href="/careers">Careers</Link>
+                <Link
+                  href="/careers"
+                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    Careers 💼
+                  </span>
+                </Link>
               </li>
             </ul>
           </div>
-          <div>
-            <h4 className="font-semibold mb-4">Support</h4>
-            <ul className="space-y-2 text-gray-400">
+
+          <div className="space-y-4">
+            <h4 className="text-foreground font-semibold">Support ❓</h4>
+            <ul className="space-y-3">
               <li>
-                <Link href="/help">Help Center</Link>
+                <Link
+                  href="/help"
+                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    Help Center 🙋‍♀️
+                  </span>
+                </Link>
               </li>
               <li>
-                <Link href="/contact">Contact</Link>
+                <Link
+                  href="/contact"
+                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    Contact Us 📞
+                  </span>
+                </Link>
               </li>
               <li>
-                <Link href="/privacy">Privacy Policy</Link>
+                <Link
+                  href="/privacy"
+                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    Privacy Policy 🔒
+                  </span>
+                </Link>
               </li>
             </ul>
           </div>
         </div>
-        <div className="border-t border-gray-800 pt-8 mt-8 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} TripAI. All rights reserved.</p>
+
+        <div className="mt-12 pt-8 border-t border-border/40">
+          <p className="text-center text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} TripAI. All rights reserved. Made
+            with ❤️
+          </p>
         </div>
       </div>
     </footer>
