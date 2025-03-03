@@ -15,6 +15,7 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { FcGoogle } from "react-icons/fc";
+import { Menu, X } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import Image from "next/image";
@@ -34,6 +35,7 @@ interface TokenInfo {
 export default function Header() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
 
   const checkUserAndCredits = async () => {
@@ -79,6 +81,28 @@ export default function Header() {
     };
   }, []);
 
+  // Close mobile menu when clicking outside or navigating
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setIsMobileMenuOpen(false);
+    };
+
+    // Handle document body overflow for mobile menu
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    // Add event listener for route changes
+    window.addEventListener("popstate", handleRouteChange);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("popstate", handleRouteChange);
+    };
+  }, [isMobileMenuOpen]);
+
   const login = useGoogleLogin({
     onSuccess: (response) => GetUserProfile(response as TokenInfo),
     onError: (error) => console.error("Login Failed:", error),
@@ -112,6 +136,7 @@ export default function Header() {
       localStorage.setItem("user", JSON.stringify(userWithCredits));
       setUser(userWithCredits);
       setOpenDialog(false);
+      setIsMobileMenuOpen(false); // Close mobile menu after login
     } catch (err) {
       console.error("Error fetching user profile:", err);
     }
@@ -121,17 +146,19 @@ export default function Header() {
     localStorage.removeItem("user");
     setUser(null);
     router.push("/");
+    setIsMobileMenuOpen(false); // Close mobile menu after logout
   };
 
   return (
-    <header className="bg-background/80 backdrop-blur-md border-b border-border/40 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto p-4 flex justify-between items-center px-6">
+    <header className="bg-background/80 backdrop-blur-md border-b border-border/40 sticky top-0 z-50 gap-0 h-16">
+      <div className="max-w-7xl mx-auto h-full flex justify-between items-center px-4 sm:px-6">
+        {/* Logo */}
         <Link
           href={user ? "/my-trips" : "/"}
           className="flex items-center group"
         >
           <Image
-            src="/logo.svg"
+            src="/logo.png"
             alt="Logo"
             width={40}
             height={40}
@@ -139,9 +166,24 @@ export default function Header() {
           />
           <span className="ml-3 text-foreground font-bold text-lg">TripAI</span>
         </Link>
-        <nav className="flex items-center gap-6">
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="lg:hidden p-2 -mr-2 hover:bg-accent/80 rounded-full transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"
+          aria-label="Toggle menu"
+        >
+          {isMobileMenuOpen ? (
+            <X className="h-5 w-5 text-foreground" />
+          ) : (
+            <Menu className="h-5 w-5 text-foreground" />
+          )}
+        </button>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden lg:flex lg:items-center lg:gap-6">
           {user ? (
-            <div className="flex items-center gap-4">
+            <>
               <Link href="/pricing">
                 <Button
                   variant="outline"
@@ -192,7 +234,7 @@ export default function Header() {
                   </div>
                 </PopoverContent>
               </Popover>
-            </div>
+            </>
           ) : (
             <Button
               onClick={() => setOpenDialog(true)}
@@ -203,6 +245,109 @@ export default function Header() {
           )}
         </nav>
       </div>
+
+      {/* Mobile Menu - Using fixed positioning with proper z-index */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 bg-background/95 backdrop-blur-md z-50 flex -top-2 flex-col">
+          <div className="flex justify-between items-center p-4 border-b border-border/40">
+            <Link
+              href={user ? "/my-trips" : "/"}
+              className="flex items-center group"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={40}
+                height={40}
+                className="cursor-pointer transition-transform duration-200 group-hover:scale-110"
+              />
+              <span className="ml-3 text-foreground font-bold text-lg">
+                TripAI
+              </span>
+            </Link>
+
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-2 hover:bg-accent/80 rounded-full transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"
+              aria-label="Close menu"
+            >
+              <X className="h-6 w-6 text-foreground" />
+            </button>
+          </div>
+
+          <div className="flex-1 transition-all bg-black">
+            <div className="flex flex-col items-center gap-6 p-6 pt-12">
+              {user ? (
+                <>
+                  <div className="flex flex-col items-center mb-8">
+                    <div className="relative group">
+                      <Image
+                        src={user.picture}
+                        width={64}
+                        height={64}
+                        className="rounded-full border-2 border-indigo-600 shadow-lg transition-transform duration-200 group-hover:scale-105"
+                        alt={user.name}
+                      />
+                      <div className="absolute inset-0 rounded-full bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                    </div>
+                    <p className="mt-4 font-medium text-lg text-foreground">
+                      {user.name}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {user.email}
+                    </p>
+                  </div>
+
+                  <Link href="/pricing" className="w-full">
+                    <Button
+                      variant="outline"
+                      className="w-full text-foreground hover:bg-accent/80 transition-all duration-200"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      💰 {user.credits ?? 0} Credits
+                    </Button>
+                  </Link>
+
+                  <Link href="/create-trip" className="w-full">
+                    <Button
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/40 transition-all duration-200"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      ✨ Create Trip
+                    </Button>
+                  </Link>
+
+                  <Link href="/my-trips" className="w-full">
+                    <Button
+                      variant="ghost"
+                      className="w-full text-foreground hover:bg-accent/80 transition-all duration-200"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      My Trips
+                    </Button>
+                  </Link>
+
+                  <Button
+                    variant="ghost"
+                    className="w-full mt-6 hover:bg-accent/80 text-foreground transition-all duration-200"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={() => setOpenDialog(true)}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200"
+                >
+                  🚀 Sign Up
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="bg-background/95 backdrop-blur-sm border-border/40 shadow-xl">
