@@ -46,25 +46,30 @@ export default function Home() {
 
   return (
     <main className="relative">
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-indigo-500/5 to-background" />
+        <div className="absolute inset-0 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.indigo.100),transparent)] opacity-10" />
+        <div className="absolute inset-0 bg-grid-white/[0.02]" />
+      </div>
+
       {/* Hero Section */}
       <section className="relative min-h-screen overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 via-background to-background" />
-          <div className="absolute inset-0 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.indigo.100),transparent)] opacity-20" />
-          <div className="absolute inset-0 bg-grid-white/[0.02]" />
-        </div>
-
         <div className="mx-auto max-w-screen-xl px-4 py-32 lg:grid lg:grid-cols-2 lg:h-screen lg:items-center lg:gap-8">
           {/* Left side with text */}
           {/* Left column for text */}
           <div className="mx-auto max-w-2xl text-left lg:mx-0">
-            <div className="bg-gradient-to-r from-indigo-600 via-sky-400 to-indigo-400 bg-clip-text text-transparent">
-              <h1 className="text-3xl font-extrabold sm:text-5xl lg:text-7xl">
-                🚀 Your Perfect Trip,
-                <span className="sm:block"> Planned by AI </span>
-                <span className="sm:block">✨</span>
-              </h1>
-            </div>
+            <h1 className="text-3xl font-extrabold sm:text-5xl lg:text-7xl flex flex-col items-start">
+              <div className="flex items-center gap-4">
+                <span className="animate-bounce">🚀</span>
+                <span className="bg-gradient-to-r from-indigo-600 via-sky-400 to-indigo-400 bg-clip-text text-transparent">
+                  Your Perfect Trip,
+                </span>
+              </div>
+              <span className="bg-gradient-to-r from-indigo-600 via-sky-400 to-indigo-400 bg-clip-text text-transparent sm:mt-2">
+                Planned by AI
+              </span>
+              <span className="animate-pulse sm:mt-2">✨</span>
+            </h1>
 
             <p className="mx-auto mt-8 max-w-3xl text-xl text-muted-foreground sm:text-2xl/relaxed">
               Create personalized travel itineraries in minutes with our
@@ -79,7 +84,9 @@ export default function Home() {
                   variant="premium"
                   className="text-lg px-8 py-6 rounded-full group transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-indigo-500/25"
                 >
-                  <span>Plan Your Trip 🗺️</span>
+                  <span>
+                    Plan Your Trip <span className="inline-block">🗺️</span>
+                  </span>
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
@@ -89,7 +96,7 @@ export default function Home() {
                   variant="outline"
                   className="text-lg px-8 py-6 rounded-full transform hover:scale-105 transition-all duration-300 hover:bg-indigo-500/10"
                 >
-                  Learn More 💡
+                  Learn More <span className="inline-block">💡</span>
                 </Button>
               </Link>
             </div>
@@ -116,8 +123,12 @@ export default function Home() {
       <section id="features" className="py-32 relative">
         <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
           <div className="max-w-xl text-center mx-auto mb-20">
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text sm:text-5xl">
-              ✨ Why Choose TripAI? ✨
+            <h2 className="flex items-center justify-center gap-4 text-4xl font-bold sm:text-5xl">
+              <span className="animate-pulse">✨</span>
+              <span className="bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+                Why Choose TripAI?
+              </span>
+              <span className="animate-pulse">✨</span>
             </h2>
           </div>
 
@@ -125,7 +136,7 @@ export default function Home() {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="group relative overflow-hidden rounded-3xl border border-border/50 bg-background/50 backdrop-blur-sm shadow-2xl transition-all duration-500 hover:shadow-indigo-500/25 hover:border-indigo-500/50"
+                className="group relative overflow-hidden rounded-3xl border border-border/50 bg-background/50 backdrop-blur-sm shadow-2xl transition-all duration-500 hover:shadow-indigo-500/25 hover:border-indigo-500/50 hover:-translate-y-1"
               >
                 <div className="w-full">
                   <div className="aspect-[3/2] w-full relative">
@@ -161,11 +172,14 @@ export default function Home() {
       {/* How It Works Section */}
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-32 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-indigo-500/5 to-background -z-10" />
+      <section id="how-it-works" className="py-32">
         <div className="container mx-auto px-8">
-          <h2 className="text-4xl font-bold text-center mb-20 bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
-            ⚙️ How It Works ⚙️
+          <h2 className="flex items-center justify-center gap-4 text-4xl font-bold text-center mb-20">
+            <span className="animate-spin-slow">⚙️</span>
+            <span className="bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+              How It Works
+            </span>
+            <span className="animate-spin-slow">⚙️</span>
           </h2>
           <div className="grid md:grid-cols-4 gap-8">
             {[
@@ -211,8 +225,12 @@ export default function Home() {
       <section id="testimonials" className="py-32">
         <div className="mx-auto max-w-screen-xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <div className="text-center mb-20">
-            <h2 className="text-4xl font-bold sm:text-5xl bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
-              🗣️ What Travelers Say 🗣️
+            <h2 className="flex items-center justify-center gap-4 text-4xl font-bold sm:text-5xl">
+              <span className="animate-bounce">🗣️</span>
+              <span className="bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+                What Travelers Say
+              </span>
+              <span className="animate-bounce">🗣️</span>
             </h2>
           </div>
 
@@ -275,17 +293,12 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-indigo-500/10 to-background -z-10" />
-          <div className="absolute inset-y-0 right-1/2 -left-[40%] bg-gradient-to-r from-indigo-600/5 to-transparent blur-2xl -z-10" />
-          <div className="absolute inset-y-0 left-1/2 -right-[40%] bg-gradient-to-l from-indigo-600/5 to-transparent blur-2xl -z-10" />
-        </div>
-
+      <section className="py-32">
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 relative">
           <div className="mx-auto max-w-4xl text-center">
             <h2 className="text-4xl font-bold sm:text-5xl md:text-6xl bg-gradient-to-r from-white via-indigo-200 to-gray-400 bg-clip-text text-transparent">
-              Ready to Start Your Journey? 🚀
+              Ready to Start Your Journey?{" "}
+              <span className="inline-block animate-float">🚀</span>
             </h2>
 
             <p className="mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-muted-foreground sm:text-2xl">
@@ -302,7 +315,10 @@ export default function Home() {
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-indigo-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                   <div className="relative flex items-center">
-                    <span>Create Your Free Itinerary ✨</span>
+                    <span>
+                      Create Your Free Itinerary{" "}
+                      <span className="inline-block animate-pulse">✨</span>
+                    </span>
                     <ArrowRight className="ml-2 h-6 w-6 transition-transform group-hover:translate-x-1" />
                   </div>
                 </Button>
@@ -317,12 +333,15 @@ export default function Home() {
       </section>
 
       {/* Popular Destinations Section */}
-      <section className="py-32 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-indigo-500/5 to-background -z-10" />
+      <section className="py-32">
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <h2 className="text-4xl font-bold sm:text-5xl bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
-              🌎 Popular Destinations 🌎
+            <h2 className="flex items-center justify-center gap-4 text-4xl font-bold sm:text-5xl">
+              <span className="animate-pulse">🌎</span>
+              <span className="bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+                Popular Destinations
+              </span>
+              <span className="animate-pulse">🌎</span>
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -391,8 +410,12 @@ export default function Home() {
       <section className="py-32 relative">
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <h2 className="text-4xl font-bold sm:text-5xl bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
-              📚 Travel Tips & Resources 📚
+            <h2 className="flex items-center justify-center gap-4 text-4xl font-bold sm:text-5xl">
+              <span className="animate-float">📚</span>
+              <span className="bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+                Travel Tips & Resources
+              </span>
+              <span className="animate-float">📚</span>
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -447,12 +470,15 @@ export default function Home() {
       </section>
 
       {/* Travel Styles */}
-      <section className="py-32 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-indigo-500/5 to-background -z-10" />
+      <section className="py-32">
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <h2 className="text-4xl font-bold sm:text-5xl bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
-              🎨 Your Travel Style 🎨
+            <h2 className="flex items-center justify-center gap-4 text-4xl font-bold sm:text-5xl">
+              <span className="animate-color-shift">🎨</span>
+              <span className="bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+                Your Travel Style
+              </span>
+              <span className="animate-color-shift">🎨</span>
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
