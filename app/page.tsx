@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -105,16 +106,13 @@ export default function Home() {
           {/* Right column for hero image */}
           <div className="hidden lg:block relative mt-12 lg:mt-0">
             <div className="aspect-[4/3] w-full relative rounded-2xl overflow-hidden border border-border/50 bg-background/50 backdrop-blur-sm shadow-2xl">
-              <div className="absolute inset-0 bg-indigo-500/10 flex items-center justify-center p-8 text-center text-muted-foreground">
-                [Hero Image: A person using the TripAI app on a tablet while
-                sitting at a scenic cafe in Santorini, Greece. The tablet shows
-                an AI-generated itinerary while the beautiful blue-domed
-                churches and Mediterranean Sea are visible in the background.
-                The scene should convey both the technological aspect of trip
-                planning and the aspirational travel experience. Size:
-                1200x900px, Style: Modern lifestyle photography with warm
-                lighting and rich colors]
-              </div>
+              <Image
+                src="https://images.unsplash.com/photo-1530789253388-582c481c54b0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                width={1200}
+                height={900}
+                alt="Hero image"
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
         </div>
@@ -140,13 +138,19 @@ export default function Home() {
               >
                 <div className="w-full">
                   <div className="aspect-[3/2] w-full relative">
-                    <div className="absolute inset-0 bg-indigo-500/10 flex items-center justify-center p-4 text-center text-sm text-muted-foreground">
-                      {feature.imageDesc}
-                      <br />
-                      <span className="mt-2 text-xs opacity-75">
-                        Size: 600x400px, Style: Clean UI/UX with modern elements
-                      </span>
-                    </div>
+                    <Image
+                      src={
+                        feature.title === "AI-Powered Recommendations"
+                          ? "https://res.cloudinary.com/dgvdv9xhx/image/upload/v1741122004/ai-travel/ruqlyblpjnlrjpvkxq6q.png"
+                          : feature.title === "Save Time Planning"
+                          ? "https://res.cloudinary.com/dgvdv9xhx/image/upload/v1741122005/ai-travel/biuvu8ci0izly6rrmbck.png"
+                          : "https://res.cloudinary.com/dgvdv9xhx/image/upload/v1741122005/ai-travel/vycgnnvippsujghuyydj.png"
+                      }
+                      alt={feature.title}
+                      width={600}
+                      height={400}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="p-8">
                     <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-indigo-500/20 bg-indigo-500/10 transition-transform duration-300 group-hover:scale-110 mb-8">
@@ -298,8 +302,10 @@ export default function Home() {
           <div className="mx-auto max-w-4xl text-center">
             <h2 className="text-4xl font-bold sm:text-5xl md:text-6xl bg-gradient-to-r from-white via-indigo-200 to-gray-400 bg-clip-text text-transparent">
               Ready to Start Your Journey?{" "}
-              <span className="inline-block animate-float">🚀</span>
             </h2>
+            <span className="inline-block animate-float text-4xl font-bold sm:text-5xl md:text-6xl">
+              🚀
+            </span>
 
             <p className="mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-muted-foreground sm:text-2xl">
               Join thousands of happy travelers who have discovered their
@@ -370,14 +376,19 @@ export default function Home() {
               >
                 {/* Destination Image */}
                 <div className="aspect-video w-full relative">
-                  <div className="absolute inset-0 bg-indigo-500/10 flex items-center justify-center p-4 text-center text-sm text-muted-foreground">
-                    {index === 0 &&
-                      "[Image: Iconic European landmarks collage featuring Eiffel Tower at sunset, Roman Colosseum, and Sagrada Familia. People enjoying local experiences like cafes and markets visible in foreground. Size: 800x450px, Style: High-end travel photography with rich colors]"}
-                    {index === 1 &&
-                      "[Image: Stunning Asian travel scene combining modern Tokyo cityscape, ancient Thai temples, and Singapore's Gardens by the Bay. Local street food and cultural activities shown. Size: 800x450px, Style: Vibrant cultural photography]"}
-                    {index === 2 &&
-                      "[Image: American landscapes panorama showing NYC skyline, Golden Gate Bridge, and Miami beach. Mix of urban exploration and natural beauty. Size: 800x450px, Style: Dynamic landscape photography]"}
-                  </div>
+                  <Image
+                    src={
+                      index === 0
+                        ? "https://res.cloudinary.com/dgvdv9xhx/image/upload/v1741122025/ai-travel/outwf1t9k6nffvgggbmb.png"
+                        : index === 1
+                        ? "https://res.cloudinary.com/dgvdv9xhx/image/upload/v1741122024/ai-travel/obvlefh15degxmhmbgr5.png"
+                        : "https://res.cloudinary.com/dgvdv9xhx/image/upload/v1741122024/ai-travel/uwvtp16hveskr2f12bwu.png"
+                    }
+                    alt={destination.title}
+                    width={800}
+                    height={450}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
                 {/* Destination Content */}
@@ -407,7 +418,7 @@ export default function Home() {
       </section>
 
       {/* Travel Tips & Resources */}
-      <section className="py-32 relative">
+      {/* <section className="py-32 relative">
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="flex items-center justify-center gap-4 text-4xl font-bold sm:text-5xl">
@@ -467,7 +478,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Travel Styles */}
       <section className="py-32">
@@ -504,14 +515,19 @@ export default function Home() {
                 className="group relative overflow-hidden rounded-3xl border border-border/50 bg-background/50 backdrop-blur-sm shadow-2xl transition-all duration-500 hover:shadow-indigo-500/25 hover:border-indigo-500/50"
               >
                 <div className="aspect-video w-full relative">
-                  <div className="absolute inset-0 bg-indigo-500/10 flex items-center justify-center p-4 text-center text-sm text-muted-foreground">
-                    {index === 0 &&
-                      "[Image: Luxury travel montage showing 5-star hotel suite interior, private yacht deck, and exclusive rooftop restaurant. Focus on premium amenities and elegant details. Size: 800x450px, Style: High-end hospitality photography]"}
-                    {index === 1 &&
-                      "[Image: Dynamic adventure collage featuring mountain climbing, jungle trekking, and underwater diving. Shows the thrill and excitement of exploration. Size: 800x450px, Style: Action sports photography]"}
-                    {index === 2 &&
-                      "[Image: Cultural immersion scenes showing traditional festivals, local artisans at work, and authentic food experiences. Emphasis on human connection and traditions. Size: 800x450px, Style: Documentary-style cultural photography]"}
-                  </div>
+                  <Image
+                    src={
+                      index === 0
+                        ? "https://res.cloudinary.com/dgvdv9xhx/image/upload/v1741122083/ai-travel/cbdhi5yprj4trujc2hms.png"
+                        : index === 1
+                        ? "https://res.cloudinary.com/dgvdv9xhx/image/upload/v1741122043/ai-travel/sbasejlcivwerhgw0yue.png"
+                        : "https://res.cloudinary.com/dgvdv9xhx/image/upload/v1741122063/ai-travel/v7jwqmlschpvenewffmf.png"
+                    }
+                    alt={style.title}
+                    width={800}
+                    height={450}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
                 <div className="p-8">

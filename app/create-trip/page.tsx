@@ -12,13 +12,7 @@ import { useEffect, useState } from "react";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 import type { SingleValue } from "react-select";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogHeader,
-} from "@/components/ui/dialog";
+import CustomDialog from "@/components/ui/CustomDialog";
 import { FcGoogle } from "react-icons/fc";
 import { useGoogleLogin } from "@react-oauth/google";
 import { MdLocationOn, MdCalendarMonth } from "react-icons/md";
@@ -523,24 +517,20 @@ export default function CreateTripPage() {
         )}
       </div>
 
-      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent className="bg-background/95 backdrop-blur-sm border-border/50">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">Sign in with Google</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              <p>Sign in to create and save your trip plans</p>
-
-              <Button
-                onClick={() => login()}
-                className="w-full mt-5 flex gap-4 items-center bg-background hover:bg-accent text-foreground"
-              >
-                <FcGoogle className="h-7 w-7" />
-                Sign in with Google
-              </Button>
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
+      <CustomDialog
+        open={openDialog}
+        onOpenChange={setOpenDialog}
+        title="Sign in with Google"
+        description="Sign in to create and save your trip plans"
+      >
+        <Button
+          onClick={() => login()}
+          className="w-full mt-5 flex gap-4 items-center bg-background hover:bg-accent text-foreground"
+        >
+          <FcGoogle className="h-7 w-7" />
+          Sign in with Google
+        </Button>
+      </CustomDialog>
     </div>
   );
 }

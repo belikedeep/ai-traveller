@@ -7,13 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogHeader,
-} from "@/components/ui/dialog";
+import CustomDialog from "@/components/ui/CustomDialog";
 import { FcGoogle } from "react-icons/fc";
 import { Menu, X } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
@@ -349,28 +343,20 @@ export default function Header() {
         </div>
       )}
 
-      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent className="bg-background/95 backdrop-blur-sm border-border/40 shadow-xl">
-          <DialogHeader>
-            <DialogTitle className="text-foreground">
-              Sign in with Google
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              <p>
-                Sign in to TripAI with Google for a seamless travel planning
-                experience.
-              </p>
-              <Button
-                onClick={() => login()}
-                className="w-full mt-5 flex gap-4 items-center bg-background hover:bg-accent text-foreground transition-colors duration-200"
-              >
-                <FcGoogle className="h-5 w-5" />
-                Sign in with Google
-              </Button>
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
+      <CustomDialog
+        open={openDialog}
+        onOpenChange={setOpenDialog}
+        title="Sign in with Google"
+        description="Sign in to TripAI with Google for a seamless travel planning experience."
+      >
+        <Button
+          onClick={() => login()}
+          className="w-full mt-5 flex gap-4 items-center bg-background hover:bg-accent text-foreground transition-colors duration-200"
+        >
+          <FcGoogle className="h-5 w-5" />
+          Sign in with Google
+        </Button>
+      </CustomDialog>
     </header>
   );
 }
