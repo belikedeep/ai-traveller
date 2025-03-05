@@ -105,7 +105,7 @@ export default function Home() {
 
           {/* Right column for hero image */}
           <div className="hidden lg:block relative mt-12 lg:mt-0">
-            <div className="aspect-[4/3] w-full relative rounded-2xl overflow-hidden border border-border/50 bg-background/50 backdrop-blur-sm shadow-2xl">
+            <div className="aspect-[4/3] w-full relative rounded-2xl overflow-hidden border border-border/50 bg-background/50 backdrop-blur-sm shadow-2xl -rotate-3">
               <Image
                 src="https://images.unsplash.com/photo-1530789253388-582c481c54b0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                 width={1200}
@@ -290,6 +290,126 @@ export default function Home() {
                 <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
                   &ldquo;{testimonial.text}&rdquo;
                 </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-32">
+        <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <h2 className="flex items-center justify-center gap-4 text-4xl font-bold sm:text-5xl">
+              <span className="animate-pulse">💎</span>
+              <span className="bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+                Simple Pricing
+              </span>
+              <span className="animate-pulse">💎</span>
+            </h2>
+            <p className="mt-6 text-xl text-muted-foreground">
+              Choose the plan that best fits your travel needs
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3 lg:gap-12">
+            {[
+              {
+                name: "FREE",
+                price: "$0",
+                description: "Perfect for trying out TripAI",
+                features: [
+                  "3 AI Trip Itineraries",
+                  "Popular Destinations",
+                  "Basic Support",
+                  "Community Access",
+                ],
+              },
+              {
+                name: "PRO",
+                price: "$5",
+                description: "Great for regular travelers",
+                features: [
+                  "Everything from Free",
+                  "15 AI Trip Itineraries",
+                  "All Destinations",
+                  "Priority Support",
+                  "Trip Sharing",
+                ],
+                popular: true,
+              },
+              {
+                name: "PREMIUM",
+                price: "$10",
+                description: "For serious travel enthusiasts",
+                features: [
+                  "Everything from Pro",
+                  "50 AI Trip Itineraries",
+                  "All Destinations",
+                  "24/7 Priority Support",
+                  "Priority Queue",
+                ],
+              },
+            ].map((plan, index) => (
+              <div
+                key={index}
+                className={`relative overflow-hidden rounded-2xl border backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl ${
+                  plan.popular
+                    ? "bg-gradient-to-b from-indigo-500/10 via-background to-background ring-2 ring-indigo-500"
+                    : "border-border/50 bg-background/50"
+                }`}
+              >
+                {plan.popular && (
+                  <div className="absolute top-0 right-0">
+                    <div className="bg-indigo-600 text-white text-xs px-3 py-1 rounded-bl-lg">
+                      Most Popular
+                    </div>
+                  </div>
+                )}
+                <div className="p-8">
+                  <h3 className="text-2xl font-bold">{plan.name}</h3>
+                  <div className="mt-4 flex items-baseline">
+                    <span className="text-5xl font-bold">{plan.price}</span>
+                    <span className="ml-1 text-muted-foreground">/month</span>
+                  </div>
+                  <p className="mt-4 text-muted-foreground">
+                    {plan.description}
+                  </p>
+                  <ul className="mt-8 space-y-4">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-center gap-3">
+                        <svg
+                          className={`w-5 h-5 ${
+                            plan.popular ? "text-indigo-500" : "text-green-500"
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span className="text-muted-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-8">
+                    <Link href="/pricing">
+                      <Button
+                        className="w-full"
+                        variant={plan.popular ? "premium" : "default"}
+                        size="lg"
+                      >
+                        Get Started
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

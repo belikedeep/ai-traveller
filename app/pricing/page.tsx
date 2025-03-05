@@ -10,13 +10,13 @@ import { Loader2 } from "lucide-react";
 
 const PRICING_PLANS = [
   {
-    name: "BASIC",
-    credits: STRIPE_PLANS.BASIC.credits,
-    price: `$${STRIPE_PLANS.BASIC.price / 100}`,
+    name: "FREE",
+    credits: STRIPE_PLANS.FREE.credits,
+    price: "$0",
     features: [
-      "5 AI Trip Itineraries",
-      "Basic Destinations",
-      "Standard Support",
+      "3 AI Trip Itineraries",
+      "Popular Destinations",
+      "Basic Support",
     ],
   },
   {
@@ -24,10 +24,11 @@ const PRICING_PLANS = [
     credits: STRIPE_PLANS.PRO.credits,
     price: `$${STRIPE_PLANS.PRO.price / 100}`,
     features: [
+      "Everything from Free",
       "15 AI Trip Itineraries",
-      "Premium Destinations",
+      "All Destinations",
       "Priority Support",
-      "Custom Modifications",
+      "Trip Sharing",
     ],
     popular: true,
   },
@@ -36,11 +37,11 @@ const PRICING_PLANS = [
     credits: STRIPE_PLANS.PREMIUM.credits,
     price: `$${STRIPE_PLANS.PREMIUM.price / 100}`,
     features: [
+      "Everything from Pro",
       "50 AI Trip Itineraries",
       "All Destinations",
       "24/7 Priority Support",
-      "Unlimited Modifications",
-      "Exclusive Features",
+      "Priority Queue",
     ],
   },
 ];
@@ -48,6 +49,7 @@ const PRICING_PLANS = [
 function PricingPageContent(): ReactNode {
   const [loading, setLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
   const { toast } = useToast();
   const [userData, setUserData] = useState<{
     name: string;
@@ -224,22 +226,38 @@ function PricingPageContent(): ReactNode {
                   </li>
                 ))}
               </ul>
-              <Button
-                className="w-full"
-                disabled={loading}
-                onClick={() => handlePurchase(plan.name)}
-                variant={plan.popular ? "premium" : "default"}
-                size="lg"
-              >
-                {loading && selectedPlan === plan.name ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Processing...
-                  </div>
-                ) : (
-                  `Purchase ${plan.credits} Credits`
-                )}
-              </Button>
+              {/* Show purchase button only for Pro and Premium plans when user is signed in */}
+              {userData && plan.name !== "FREE" ? (
+                <Button
+                  className="w-full"
+                  disabled={loading}
+                  onClick={() => handlePurchase(plan.name)}
+                  variant={plan.popular ? "premium" : "default"}
+                  size="lg"
+                >
+                  {loading && selectedPlan === plan.name ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Processing...
+                    </div>
+                  ) : (
+                    `Get ${plan.credits} Credits`
+                  )}
+                </Button>
+              ) : plan.name === "FREE" ? (
+                <Button className="w-full" variant="outline" size="lg" disabled>
+                  Free Plan
+                </Button>
+              ) : (
+                <Button
+                  className="w-full"
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setOpenDialog(true)}
+                >
+                  Sign in to Purchase
+                </Button>
+              )}
             </div>
           </div>
         ))}
