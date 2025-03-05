@@ -49,7 +49,7 @@ const PRICING_PLANS = [
 function PricingPageContent(): ReactNode {
   const [loading, setLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [, setOpenDialog] = useState(false);
   const { toast } = useToast();
   const [userData, setUserData] = useState<{
     name: string;

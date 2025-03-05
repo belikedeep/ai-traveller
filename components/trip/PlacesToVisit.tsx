@@ -84,7 +84,7 @@ function PlacesToVisit({ trip }: TripProps) {
   }, [trip?.userSelection.location.label, memoizedDays]);
 
   useEffect(() => {
-    if (trip?.tripData?.itinerary) {
+    if (Object.keys(memoizedItinerary).length > 0) {
       fetchPlacePhotos();
     }
   }, [memoizedItinerary, fetchPlacePhotos]);
