@@ -1,7 +1,7 @@
 "use client";
 
+import React, { Suspense } from "react";
 import posthog from "posthog-js";
-import React from "react";
 import { PostHogProvider } from "posthog-js/react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -16,7 +16,8 @@ if (typeof window !== "undefined") {
   });
 }
 
-export function PostHogPageview(): React.ReactElement {
+// Separate component for analytics to be wrapped in Suspense
+function PostHogPageviewInner(): React.ReactElement {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -33,6 +34,15 @@ export function PostHogPageview(): React.ReactElement {
   }, [pathname, searchParams]);
 
   return <></>;
+}
+
+// Wrapper component that includes Suspense
+export function PostHogPageview(): React.ReactElement {
+  return (
+    <Suspense fallback={null}>
+      <PostHogPageviewInner />
+    </Suspense>
+  );
 }
 
 export function PHProvider({ children }: { children: React.ReactNode }) {
