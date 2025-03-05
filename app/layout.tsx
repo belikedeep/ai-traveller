@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+import {
+  PHProvider,
+  PostHogPageview,
+} from "@/components/providers/posthog-provider";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "sonner";
@@ -78,20 +82,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased dark min-h-screen bg-gradient-to-b from-background via-background/95 to-background/90`}
       >
-        <GoogleOAuthProvider
-          clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "dummy-id"}
-        >
-          <div className="relative min-h-screen">
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
-            <div className="absolute inset-0 bg-gradient-to-tr from-background via-indigo-900/5 to-background -z-10" />
+        <PHProvider>
+          <GoogleOAuthProvider
+            clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "dummy-id"}
+          >
+            <div className="relative min-h-screen">
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-background via-indigo-900/5 to-background -z-10" />
 
-            <Header />
-            <main className="relative">{children}</main>
-            <Toaster position="bottom-right" />
-            <Footer />
-          </div>
-        </GoogleOAuthProvider>
+              <Header />
+              <main className="relative">{children}</main>
+              <PostHogPageview />
+              <Toaster position="bottom-right" />
+              <Footer />
+            </div>
+          </GoogleOAuthProvider>
+        </PHProvider>
       </body>
     </html>
   );
