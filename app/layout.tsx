@@ -16,6 +16,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import type { Viewport } from "next";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "TripAI - Your AI-Powered Travel Planning Assistant",
   description:
@@ -53,10 +60,6 @@ export const metadata: Metadata = {
       index: true,
       follow: true,
     },
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
   },
   icons: {
     icon: "/logo.svg",
