@@ -79,6 +79,8 @@ export default function ViewTripPage({
     );
   }
 
+  // TODO : Remove cat place holder
+
   return (
     <div className="relative">
       {/* Background decorations */}

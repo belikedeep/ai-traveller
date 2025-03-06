@@ -19,6 +19,7 @@ const PRICING_PLANS = [
       "3 AI Trip Itineraries",
       "Popular Destinations",
       "Basic Support",
+      "Authenticated Sharing (Sign-in required)",
     ],
   },
   {
@@ -31,7 +32,8 @@ const PRICING_PLANS = [
       "15 AI Trip Itineraries",
       "All Destinations",
       "Priority Support",
-      "Trip Sharing",
+      "Public Trip Sharing",
+      "Share with Anyone (No Sign-in Required)",
     ],
     popular: true,
   },
@@ -46,6 +48,8 @@ const PRICING_PLANS = [
       "All Destinations",
       "24/7 Priority Support",
       "Priority Queue",
+      "Advanced Trip Sharing Analytics",
+      "Unlimited Public Sharing",
     ],
   },
 ];

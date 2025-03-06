@@ -1,13 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { GetPlaceDetails, GetPlacePhoto } from "@/service/GlobalAPI";
 import Image from "next/image";
 import { useEffect, useState, useCallback, memo } from "react";
-import { Share2, MapPin, Calendar, Wallet2, Users } from "lucide-react";
+import { MapPin, Calendar, Wallet2, Users } from "lucide-react";
+import ShareTripDialog from "./ShareTripDialog";
 
 interface TripProps {
   trip: {
+    id?: string;
     userSelection: {
       location: {
         label: string;
@@ -89,10 +90,10 @@ function InfoSection({ trip }: TripProps) {
             </div>
           </div>
 
-          <Button variant="outline" size="lg" className="w-full md:w-auto">
-            <Share2 className="mr-2 h-4 w-4" />
-            Share Trip
-          </Button>
+          <ShareTripDialog
+            tripId={trip.id || Date.now().toString()}
+            location={trip.userSelection.location.label}
+          />
         </div>
       </div>
     </div>
