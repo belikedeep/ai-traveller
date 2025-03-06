@@ -319,10 +319,11 @@ export default function Home() {
                 price: "$0",
                 description: "Perfect for trying out TripAI",
                 features: [
+                  "Plan trips up to 5 days",
                   "3 AI Trip Itineraries",
                   "Popular Destinations",
                   "Basic Support",
-                  "Community Access",
+                  "Authenticated Sharing (Sign-in required)",
                 ],
               },
               {
@@ -331,10 +332,12 @@ export default function Home() {
                 description: "Great for regular travelers",
                 features: [
                   "Everything from Free",
+                  "Plan trips up to 15 days",
                   "15 AI Trip Itineraries",
                   "All Destinations",
                   "Priority Support",
-                  "Trip Sharing",
+                  "Public Trip Sharing",
+                  "Share with Anyone (No Sign-in Required)",
                 ],
                 popular: true,
               },
@@ -344,10 +347,13 @@ export default function Home() {
                 description: "For serious travel enthusiasts",
                 features: [
                   "Everything from Pro",
+                  "Plan trips up to 15 days",
                   "50 AI Trip Itineraries",
                   "All Destinations",
                   "24/7 Priority Support",
                   "Priority Queue",
+                  "Advanced Trip Sharing Analytics",
+                  "Unlimited Public Sharing",
                 ],
               },
             ].map((plan, index) => (
@@ -370,7 +376,9 @@ export default function Home() {
                   <h3 className="text-2xl font-bold">{plan.name}</h3>
                   <div className="mt-4 flex items-baseline">
                     <span className="text-5xl font-bold">{plan.price}</span>
-                    <span className="ml-1 text-muted-foreground">/month</span>
+                    <span className="ml-1 text-muted-foreground">
+                      /one-time
+                    </span>
                   </div>
                   <p className="mt-4 text-muted-foreground">
                     {plan.description}
