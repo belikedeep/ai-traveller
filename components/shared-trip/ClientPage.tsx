@@ -7,7 +7,6 @@ import { Loader2 } from "lucide-react";
 import InfoSection from "@/components/trip/InfoSection";
 import Hotels from "@/components/trip/Hotels";
 import PlacesToVisit from "@/components/trip/PlacesToVisit";
-import SignInRequired from "@/components/ui/SignInRequired";
 
 interface TripData {
   id: string;
@@ -56,8 +55,6 @@ export default function ClientPage({ params }: ClientPageProps) {
   const [trip, setTrip] = useState<TripData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [requiresAuth, setRequiresAuth] = useState(false);
-
   const fetchTrip = useCallback(async () => {
     try {
       const tripRef = doc(db, "AITrips", params.tripId);
@@ -69,22 +66,11 @@ export default function ClientPage({ params }: ClientPageProps) {
       }
 
       const tripData = tripSnap.data() as Omit<TripData, "id">;
-      const tripOwnerRef = doc(db, "users", tripData.userEmail);
-      const tripOwnerSnap = await getDoc(tripOwnerRef);
-
-      // Check if owner is PRO/PREMIUM for public access
-      const isPublic =
-        tripOwnerSnap.exists() &&
-        ["PRO", "PREMIUM"].includes(tripOwnerSnap.data().plan);
-
-      if (!isPublic) {
-        // Check if user is authenticated
-        const localUser = localStorage.getItem("user");
-        if (!localUser) {
-          setRequiresAuth(true);
-          return;
-        }
-      }
+      // For shared trip URLs, allow access regardless of the owner's plan
+      setTrip({
+        ...tripData,
+        id: tripSnap.id,
+      });
 
       setTrip({
         ...tripData,
@@ -110,18 +96,6 @@ export default function ClientPage({ params }: ClientPageProps) {
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
           <p className="text-muted-foreground">Loading trip details...</p>
         </div>
-      </div>
-    );
-  }
-
-  // Authentication required state
-  if (requiresAuth) {
-    return (
-      <div className="min-h-screen bg-background">
-        <SignInRequired
-          message="This trip requires authentication to view. Please sign in to continue."
-          onSignIn={fetchTrip}
-        />
       </div>
     );
   }

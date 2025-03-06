@@ -30,7 +30,13 @@ export default function Header() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSharedPage, setIsSharedPage] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    // Check if we're on a shared trip page
+    setIsSharedPage(window.location.pathname.startsWith("/shared-trips/"));
+  }, []);
 
   const checkUserAndCredits = async () => {
     const userData = localStorage.getItem("user");
@@ -148,7 +154,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto h-full flex justify-between items-center px-4 sm:px-6">
         {/* Logo */}
         <Link
-          href={user ? "/my-trips" : "/"}
+          href={isSharedPage ? "/" : user ? "/my-trips" : "/"}
           className="flex items-center group"
         >
           <Image
@@ -176,67 +182,68 @@ export default function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex lg:items-center lg:gap-6">
-          {user ? (
-            <>
-              <Link href="/pricing">
-                <Button
-                  variant="outline"
-                  className="text-foreground hover:bg-accent transition-colors duration-200"
-                >
-                  💰 {user.credits ?? 0} Credits
-                </Button>
-              </Link>
-              <Link href="/create-trip">
-                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-indigo-600/40">
-                  ✨ Create Trip
-                </Button>
-              </Link>
-              <Link href="/my-trips">
-                <Button
-                  variant="ghost"
-                  className="text-foreground hover:bg-accent transition-colors duration-200"
-                >
-                  My Trips
-                </Button>
-              </Link>
-              <Popover>
-                <PopoverTrigger>
-                  <div className="relative group">
-                    <Image
-                      src={user.picture}
-                      width={40}
-                      height={40}
-                      className="rounded-full cursor-pointer border-2 border-border/40 transition-all duration-200 group-hover:border-indigo-600 group-hover:scale-105"
-                      alt={user.name}
-                    />
-                    <div className="absolute inset-0 rounded-full bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent className="bg-background/95 backdrop-blur-sm border-border/40 shadow-xl">
-                  <div className="p-3">
-                    <p className="font-medium text-foreground">{user.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {user.email}
-                    </p>
-                    <Button
-                      variant="ghost"
-                      className="w-full mt-3 hover:bg-accent text-foreground transition-colors duration-200"
-                      onClick={handleLogout}
-                    >
-                      Logout
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </>
-          ) : (
-            <Button
-              onClick={() => setOpenDialog(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-indigo-600/40"
-            >
-              🚀 Sign Up
-            </Button>
-          )}
+          {!isSharedPage &&
+            (user ? (
+              <>
+                <Link href="/pricing">
+                  <Button
+                    variant="outline"
+                    className="text-foreground hover:bg-accent transition-colors duration-200"
+                  >
+                    💰 {user.credits ?? 0} Credits
+                  </Button>
+                </Link>
+                <Link href="/create-trip">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-indigo-600/40">
+                    ✨ Create Trip
+                  </Button>
+                </Link>
+                <Link href="/my-trips">
+                  <Button
+                    variant="ghost"
+                    className="text-foreground hover:bg-accent transition-colors duration-200"
+                  >
+                    My Trips
+                  </Button>
+                </Link>
+                <Popover>
+                  <PopoverTrigger>
+                    <div className="relative group">
+                      <Image
+                        src={user.picture}
+                        width={40}
+                        height={40}
+                        className="rounded-full cursor-pointer border-2 border-border/40 transition-all duration-200 group-hover:border-indigo-600 group-hover:scale-105"
+                        alt={user.name}
+                      />
+                      <div className="absolute inset-0 rounded-full bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="bg-background/95 backdrop-blur-sm border-border/40 shadow-xl">
+                    <div className="p-3">
+                      <p className="font-medium text-foreground">{user.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user.email}
+                      </p>
+                      <Button
+                        variant="ghost"
+                        className="w-full mt-3 hover:bg-accent text-foreground transition-colors duration-200"
+                        onClick={handleLogout}
+                      >
+                        Logout
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </>
+            ) : (
+              <Button
+                onClick={() => setOpenDialog(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-indigo-600/40"
+              >
+                🚀 Sign Up
+              </Button>
+            ))}
         </nav>
       </div>
 
@@ -272,72 +279,73 @@ export default function Header() {
 
           <div className="flex-1 transition-all bg-black">
             <div className="flex flex-col items-center gap-6 p-6 pt-12">
-              {user ? (
-                <>
-                  <div className="flex flex-col items-center mb-8">
-                    <div className="relative group">
-                      <Image
-                        src={user.picture}
-                        width={64}
-                        height={64}
-                        className="rounded-full border-2 border-indigo-600 shadow-lg transition-transform duration-200 group-hover:scale-105"
-                        alt={user.name}
-                      />
-                      <div className="absolute inset-0 rounded-full bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+              {!isSharedPage &&
+                (user ? (
+                  <>
+                    <div className="flex flex-col items-center mb-8">
+                      <div className="relative group">
+                        <Image
+                          src={user.picture}
+                          width={64}
+                          height={64}
+                          className="rounded-full border-2 border-indigo-600 shadow-lg transition-transform duration-200 group-hover:scale-105"
+                          alt={user.name}
+                        />
+                        <div className="absolute inset-0 rounded-full bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      </div>
+                      <p className="mt-4 font-medium text-lg text-foreground">
+                        {user.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {user.email}
+                      </p>
                     </div>
-                    <p className="mt-4 font-medium text-lg text-foreground">
-                      {user.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {user.email}
-                    </p>
-                  </div>
 
-                  <Link href="/pricing" className="w-full">
-                    <Button
-                      variant="outline"
-                      className="w-full text-foreground hover:bg-accent/80 transition-all duration-200"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      💰 {user.credits ?? 0} Credits
-                    </Button>
-                  </Link>
+                    <Link href="/pricing" className="w-full">
+                      <Button
+                        variant="outline"
+                        className="w-full text-foreground hover:bg-accent/80 transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        💰 {user.credits ?? 0} Credits
+                      </Button>
+                    </Link>
 
-                  <Link href="/create-trip" className="w-full">
-                    <Button
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/40 transition-all duration-200"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      ✨ Create Trip
-                    </Button>
-                  </Link>
+                    <Link href="/create-trip" className="w-full">
+                      <Button
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/40 transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        ✨ Create Trip
+                      </Button>
+                    </Link>
 
-                  <Link href="/my-trips" className="w-full">
+                    <Link href="/my-trips" className="w-full">
+                      <Button
+                        variant="ghost"
+                        className="w-full text-foreground hover:bg-accent/80 transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        My Trips
+                      </Button>
+                    </Link>
+
                     <Button
                       variant="ghost"
-                      className="w-full text-foreground hover:bg-accent/80 transition-all duration-200"
-                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full mt-6 hover:bg-accent/80 text-foreground transition-all duration-200"
+                      onClick={handleLogout}
                     >
-                      My Trips
+                      Logout
                     </Button>
-                  </Link>
-
+                  </>
+                ) : (
                   <Button
-                    variant="ghost"
-                    className="w-full mt-6 hover:bg-accent/80 text-foreground transition-all duration-200"
-                    onClick={handleLogout}
+                    onClick={() => setOpenDialog(true)}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200"
                   >
-                    Logout
+                    🚀 Sign Up
                   </Button>
-                </>
-              ) : (
-                <Button
-                  onClick={() => setOpenDialog(true)}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200"
-                >
-                  🚀 Sign Up
-                </Button>
-              )}
+                ))}
             </div>
           </div>
         </div>
