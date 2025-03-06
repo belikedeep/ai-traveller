@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "next/navigation";
 import { STRIPE_PLANS } from "@/lib/stripe";
 import { Loader2 } from "lucide-react";
+import { PLAN_LIMITS } from "@/service/UserService";
 
 const PRICING_PLANS = [
   {
@@ -14,6 +15,7 @@ const PRICING_PLANS = [
     credits: STRIPE_PLANS.FREE.credits,
     price: "$0",
     features: [
+      "Plan trips up to 5 days",
       "3 AI Trip Itineraries",
       "Popular Destinations",
       "Basic Support",
@@ -25,6 +27,7 @@ const PRICING_PLANS = [
     price: `$${STRIPE_PLANS.PRO.price / 100}`,
     features: [
       "Everything from Free",
+      "Plan trips up to 15 days",
       "15 AI Trip Itineraries",
       "All Destinations",
       "Priority Support",
@@ -38,6 +41,7 @@ const PRICING_PLANS = [
     price: `$${STRIPE_PLANS.PREMIUM.price / 100}`,
     features: [
       "Everything from Pro",
+      "Plan trips up to 15 days",
       "50 AI Trip Itineraries",
       "All Destinations",
       "24/7 Priority Support",
@@ -56,6 +60,7 @@ function PricingPageContent(): ReactNode {
     email: string;
     picture: string;
     credits?: number;
+    plan?: "FREE" | "PRO" | "PREMIUM";
   } | null>(null);
 
   const searchParams = useSearchParams();
@@ -80,18 +85,22 @@ function PricingPageContent(): ReactNode {
 
       if (success === "true") {
         const newCredits = searchParams.get("newCredits");
-        if (newCredits && userData && isSubscribed) {
+        const newPlan = searchParams.get("newPlan") as "PRO" | "PREMIUM" | null;
+        if (newCredits && newPlan && userData && isSubscribed) {
           const credits = parseInt(newCredits);
           const updatedUserData = {
             ...userData,
             credits,
+            plan: newPlan as "PRO" | "PREMIUM",
           };
           localStorage.setItem("user", JSON.stringify(updatedUserData));
           setUserData(updatedUserData);
 
           toast({
             title: "Payment Successful! 🎉",
-            description: `Your account has been credited with ${newCredits} credits.`,
+            description: `Your account has been upgraded to ${newPlan} plan with ${newCredits} credits. You can now plan trips up to ${
+              PLAN_LIMITS[newPlan as keyof typeof PLAN_LIMITS]
+            } days!`,
           });
         }
       } else if (error === "true") {

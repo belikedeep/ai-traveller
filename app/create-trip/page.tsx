@@ -25,7 +25,9 @@ import { useRouter } from "next/navigation";
 import {
   updateUserCredits,
   getUser,
+  initializeUser,
   CREDIT_COSTS,
+  PLAN_LIMITS,
 } from "@/service/UserService";
 
 interface GooglePlaceData {
@@ -53,6 +55,7 @@ interface UserProfile {
   name: string;
   picture: string;
   credits?: number;
+  plan?: "FREE" | "PRO" | "PREMIUM";
 }
 
 interface TokenInfo {
@@ -73,15 +76,56 @@ export default function CreateTripPage() {
     name: string,
     value: string | number | GooglePlaceData
   ) => {
-    if (name === "noOfDays" && Number(value) > 5) {
-      toast.error("You can't plan a trip for more than 5 days");
-      return;
+    if (name === "noOfDays") {
+      const user = JSON.parse(
+        localStorage.getItem("user") || "{}"
+      ) as UserProfile;
+
+      // Add debug logging
+      console.log("Current user data:", user);
+      console.log("User plan:", user?.plan);
+
+      // Ensure plan is uppercase for comparison
+      const userPlan = (user?.plan?.toUpperCase() ||
+        "FREE") as keyof typeof PLAN_LIMITS;
+      const planLimit = PLAN_LIMITS[userPlan];
+
+      console.log("Plan limit for", userPlan, "is", planLimit);
+      if (Number(value) > planLimit) {
+        toast.error(
+          `Your ${userPlan} plan only allows trips up to ${planLimit} days. Upgrade for longer trips!`
+        );
+        return;
+      }
     }
     setFormData({
       ...formData,
       [name]: value,
     });
   };
+
+  // Sync with Firestore on mount
+  useEffect(() => {
+    const syncUserData = async () => {
+      const user = localStorage.getItem("user");
+      if (user) {
+        const userData = JSON.parse(user) as UserProfile;
+        const firestoreUser = await getUser(userData.email);
+        if (firestoreUser) {
+          // Update local storage with latest Firestore data
+          const updatedUserData = {
+            ...userData,
+            credits: firestoreUser.credits,
+            plan: firestoreUser.plan.toUpperCase(), // Ensure plan is uppercase
+          };
+          localStorage.setItem("user", JSON.stringify(updatedUserData));
+          console.log("Synced user data:", updatedUserData);
+        }
+      }
+    };
+
+    syncUserData();
+  }, []);
 
   useEffect(() => {
     console.log(formData);
@@ -156,6 +200,7 @@ export default function CreateTripPage() {
           const updatedLocalUser = {
             ...userData,
             credits: updatedUser.credits,
+            plan: updatedUser.plan, // Preserve the plan when updating credits
           };
           localStorage.setItem("user", JSON.stringify(updatedLocalUser));
 
@@ -193,9 +238,28 @@ export default function CreateTripPage() {
           Accept: "application/json",
         },
       })
-      .then((res) => {
-        localStorage.setItem("user", JSON.stringify(res.data));
-        console.log("User Profile:", res);
+      .then(async (res) => {
+        // Get or create user in Firestore
+        let firestoreUser = await getUser(res.data.email);
+
+        if (!firestoreUser) {
+          // Initialize new user in Firestore
+          firestoreUser = await initializeUser({
+            name: res.data.name,
+            email: res.data.email,
+            picture: res.data.picture,
+          });
+        }
+
+        // Combine Google profile with Firestore data
+        const userData = {
+          ...res.data,
+          credits: firestoreUser?.credits || 0,
+          plan: firestoreUser?.plan || "FREE",
+        };
+
+        localStorage.setItem("user", JSON.stringify(userData));
+        console.log("User Profile:", userData);
         setOpenDialog(false);
         OnGenerateTrip();
       })
@@ -343,17 +407,33 @@ export default function CreateTripPage() {
                 </h2>
               </div>
               <div>
-                <Input
-                  placeholder="Number of days (max 5)"
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={formData.noOfDays || ""}
-                  onChange={(e) =>
-                    handleInputChange("noOfDays", parseInt(e.target.value))
-                  }
-                  className="text-lg"
-                />
+                {(() => {
+                  const user = JSON.parse(
+                    localStorage.getItem("user") || "{}"
+                  ) as UserProfile;
+                  console.log("Days Input - Current user:", user);
+                  const userPlan = (user?.plan?.toUpperCase() ||
+                    "FREE") as keyof typeof PLAN_LIMITS;
+                  console.log(
+                    "Days Input - User plan (after uppercase):",
+                    userPlan
+                  );
+                  const planLimit = PLAN_LIMITS[userPlan];
+                  console.log("Days Input - Plan limit:", planLimit);
+                  return (
+                    <Input
+                      placeholder={`Number of days (max ${planLimit} for ${userPlan} plan)`}
+                      type="number"
+                      min="1"
+                      max={planLimit}
+                      value={formData.noOfDays || ""}
+                      onChange={(e) =>
+                        handleInputChange("noOfDays", parseInt(e.target.value))
+                      }
+                      className="text-lg"
+                    />
+                  );
+                })()}
               </div>
               <div className="text-sm text-muted-foreground">
                 <p>

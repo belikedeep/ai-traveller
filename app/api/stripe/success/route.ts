@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe, STRIPE_PLANS } from "@/lib/stripe";
-import { getUser, updateUserCredits } from "@/service/UserService";
+import {
+  getUser,
+  updateUserCredits,
+  updateUserPlan,
+} from "@/service/UserService";
 
 export async function GET(req: NextRequest) {
   try {
@@ -32,12 +36,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
-    // Update user credits
+    // Update user credits and plan
     const user = await getUser(email);
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Update credits
     const updatedUser = await updateUserCredits(
       email,
       user.credits + planDetails.credits
@@ -52,10 +57,22 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Add credits info to redirect URL
+    // Update plan
+    const finalUser = await updateUserPlan(email, plan as "PRO" | "PREMIUM");
+
+    if (!finalUser) {
+      return NextResponse.redirect(
+        new URL(
+          `/pricing?error=true&message=failed-to-update-plan`,
+          req.nextUrl.origin
+        )
+      );
+    }
+
+    // Add credits and plan info to redirect URL
     return NextResponse.redirect(
       new URL(
-        `/pricing?success=true&newCredits=${updatedUser.credits}`,
+        `/pricing?success=true&newCredits=${finalUser.credits}&newPlan=${finalUser.plan}`,
         req.nextUrl.origin
       )
     );
