@@ -160,59 +160,6 @@ export default function Header() {
     setIsMobileMenuOpen(false);
   };
 
-  const renderUserMenu = () => (
-    <>
-      <Link href="/pricing">
-        <Button
-          variant="outline"
-          className="text-foreground hover:bg-accent transition-colors duration-200"
-        >
-          💰 {user?.credits ?? 0} Credits
-        </Button>
-      </Link>
-      <Link href="/create-trip">
-        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-indigo-600/40">
-          ✨ Create Trip
-        </Button>
-      </Link>
-      <Link href="/my-trips">
-        <Button
-          variant="ghost"
-          className="text-foreground hover:bg-accent transition-colors duration-200"
-        >
-          My Trips
-        </Button>
-      </Link>
-      <Popover>
-        <PopoverTrigger>
-          <div className="relative group">
-            <Image
-              src={user?.picture || ""}
-              width={40}
-              height={40}
-              className="rounded-full cursor-pointer border-2 border-border/40 transition-all duration-200 group-hover:border-indigo-600 group-hover:scale-105"
-              alt={user?.name || "User"}
-            />
-            <div className="absolute inset-0 rounded-full bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-          </div>
-        </PopoverTrigger>
-        <PopoverContent className="bg-background/95 backdrop-blur-sm border-border/40 shadow-xl">
-          <div className="p-3">
-            <p className="font-medium text-foreground">{user?.name}</p>
-            <p className="text-sm text-muted-foreground">{user?.email}</p>
-            <Button
-              variant="ghost"
-              className="w-full mt-3 hover:bg-accent text-foreground transition-colors duration-200"
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
-          </div>
-        </PopoverContent>
-      </Popover>
-    </>
-  );
-
   return (
     <header className="bg-background/80 backdrop-blur-md border-b border-border/40 sticky top-0 z-50 gap-0 h-16">
       <div className="max-w-7xl mx-auto h-full flex justify-between items-center px-4 sm:px-6">
@@ -246,18 +193,6 @@ export default function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex lg:items-center lg:gap-6">
-<<<<<<< HEAD
-          {user ? (
-            renderUserMenu()
-          ) : (
-            <Button
-              onClick={() => setOpenDialog(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-indigo-600/40"
-            >
-              🚀 Sign Up
-            </Button>
-          )}
-=======
           {!isSharedPage &&
             (user ? (
               <>
@@ -320,7 +255,6 @@ export default function Header() {
                 🚀 Sign Up
               </Button>
             ))}
->>>>>>> 57db0da88481b6a9802b7e687d17a707f3ba8c97
         </nav>
       </div>
 

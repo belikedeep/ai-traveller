@@ -7,11 +7,8 @@ import { Loader2 } from "lucide-react";
 import InfoSection from "@/components/trip/InfoSection";
 import Hotels from "@/components/trip/Hotels";
 import PlacesToVisit from "@/components/trip/PlacesToVisit";
-<<<<<<< HEAD
 import SignInRequired from "@/components/ui/SignInRequired";
 import { syncUserAuth } from "@/lib/auth-utils";
-=======
->>>>>>> 57db0da88481b6a9802b7e687d17a707f3ba8c97
 
 interface TripData {
   id: string;
@@ -56,6 +53,7 @@ export default function ClientPage({ tripId }: ClientPageProps) {
   const [trip, setTrip] = useState<TripData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [requiresAuth, setRequiresAuth] = useState(false);
   const fetchTrip = useCallback(async () => {
     try {
       setLoading(true);
@@ -70,7 +68,6 @@ export default function ClientPage({ tripId }: ClientPageProps) {
       }
 
       const tripData = tripSnap.data() as Omit<TripData, "id">;
-<<<<<<< HEAD
       const tripOwnerRef = doc(db, "users", tripData.userEmail);
       const tripOwnerSnap = await getDoc(tripOwnerRef);
 
@@ -84,13 +81,6 @@ export default function ClientPage({ tripId }: ClientPageProps) {
         setRequiresAuth(true);
         return;
       }
-=======
-      // For shared trip URLs, allow access regardless of the owner's plan
-      setTrip({
-        ...tripData,
-        id: tripSnap.id,
-      });
->>>>>>> 57db0da88481b6a9802b7e687d17a707f3ba8c97
 
       setTrip({
         ...tripData,
@@ -129,7 +119,6 @@ export default function ClientPage({ tripId }: ClientPageProps) {
     };
   }, [fetchTrip]);
 
-<<<<<<< HEAD
   // Authentication required state - show this first
   if (requiresAuth) {
     return (
@@ -144,10 +133,6 @@ export default function ClientPage({ tripId }: ClientPageProps) {
 
   // Loading state
   if (loading && !error) {
-=======
-  // Loading state
-  if (loading) {
->>>>>>> 57db0da88481b6a9802b7e687d17a707f3ba8c97
     return (
       <div className="min-h-screen bg-background">
         <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
