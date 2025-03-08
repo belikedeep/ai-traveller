@@ -28,33 +28,33 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "TripAI - Your AI-Powered Travel Planning Assistant",
+  title: "Trip Genie - Your AI-Powered Travel Planning Assistant",
   description:
     "Create personalized travel itineraries in minutes with our advanced AI technology. Get custom recommendations, save planning time, and explore destinations with confidence.",
   keywords:
     "AI travel planner, travel itinerary, trip planning, personalized travel, travel assistant, custom itinerary, travel recommendations",
-  authors: [{ name: "TripAI" }],
+  authors: [{ name: "Trip Genie" }],
   openGraph: {
-    title: "TripAI - Your AI-Powered Travel Planning Assistant",
+    title: "Trip Genie - Your AI-Powered Travel Planning Assistant",
     description:
-      "Create personalized travel itineraries in minutes with our advanced AI technology.",
+      "Create personalized travel itineraries in minutes with Trip Genie.",
     type: "website",
     locale: "en_US",
-    url: "https://tripai.com",
+    url: "https://www.tripgenie.pro",
     images: [
       {
         url: "https://images.unsplash.com/photo-1530789253388-582c481c54b0",
         width: 2070,
         height: 1380,
-        alt: "TripAI - AI Travel Planning",
+        alt: "Trip Genie - AI Travel Planning",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "TripAI - Your AI-Powered Travel Planning Assistant",
+    title: "Trip Genie - Your AI-Powered Travel Planning Assistant",
     description:
-      "Create personalized travel itineraries in minutes with our advanced AI technology.",
+      "Create personalized travel itineraries in minutes with Trip Genie.",
     images: ["https://images.unsplash.com/photo-1530789253388-582c481c54b0"],
   },
   robots: {

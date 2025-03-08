@@ -97,7 +97,7 @@ export default function TripsClient() {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-6">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-semibold">Welcome to TripAI</h2>
+          <h2 className="text-2xl font-semibold">Welcome to Trip Genie</h2>
           <p className="text-muted-foreground">
             Please sign in to view your trips
           </p>

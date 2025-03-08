@@ -9,7 +9,7 @@ interface PageProps {
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const { tripId } = await props.params;
   return {
-    title: `Trip ${tripId} | TripAI`,
-    description: `View this AI-generated travel itinerary for trip ${tripId}.`,
+    title: `Trip ${tripId} | Trip Genie`,
+    description: `View this Trip Genie-generated travel itinerary for trip ${tripId}.`,
   };
 }
