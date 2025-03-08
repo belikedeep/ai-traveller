@@ -12,7 +12,7 @@ export const metadata: Metadata = {
       "Manage your AI-generated travel itineraries and plan new adventures.",
     type: "website",
     locale: "en_US",
-    url: "https://tripai.com/my-trips",
+    url: "https://www.tripgenie.pro/my-trips",
   },
   twitter: {
     card: "summary",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://tripai.com/my-trips",
+    canonical: "https://www.tripgenie.pro/my-trips",
   },
   verification: {
     google: "your-google-site-verification", // Add this when you have the actual verification code

@@ -175,7 +175,9 @@ export default function Header() {
             height={40}
             className="cursor-pointer transition-transform duration-200 group-hover:scale-110"
           />
-          <span className="ml-3 text-foreground font-bold text-lg">TripAI</span>
+          <span className="ml-3 text-foreground font-bold text-lg">
+            Trip Genie
+          </span>
         </Link>
 
         {/* Mobile Menu Button */}
@@ -275,7 +277,7 @@ export default function Header() {
                 className="cursor-pointer transition-transform duration-200 group-hover:scale-110"
               />
               <span className="ml-3 text-foreground font-bold text-lg">
-                TripAI
+                Trip Genie
               </span>
             </Link>
 
@@ -366,7 +368,7 @@ export default function Header() {
         open={openDialog}
         onOpenChange={setOpenDialog}
         title="Sign in with Google"
-        description="Sign in to TripAI with Google for a seamless travel planning experience."
+        description="Sign in to Trip Genie with Google for a seamless travel planning experience."
       >
         <Button
           onClick={() => login()}

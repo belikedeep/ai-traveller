@@ -33,7 +33,7 @@ export default function Home() {
       description:
         "Create detailed itineraries in minutes instead of hours of research.",
       imageDesc:
-        "Split screen showing a person traditionally planning a trip with papers and guides (looking stressed) vs using TripAI (looking relaxed). The AI side shows real-time itinerary generation. Size: 600x400px, Style: Lifestyle comparison photography",
+        "Split screen showing a person traditionally planning a trip with papers and guides (looking stressed) vs using Trip Genie (looking relaxed). The AI side shows real-time itinerary generation. Size: 600x400px, Style: Lifestyle comparison photography",
     },
     {
       icon: <Settings className="h-12 w-12 text-indigo-500" />,
@@ -124,7 +124,7 @@ export default function Home() {
             <h2 className="flex items-center justify-center gap-4 text-4xl font-bold sm:text-5xl">
               <span className="animate-pulse">✨</span>
               <span className="bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
-                Why Choose TripAI?
+                Why Choose Trip Genie?
               </span>
               <span className="animate-pulse">✨</span>
             </h2>
@@ -317,7 +317,7 @@ export default function Home() {
               {
                 name: "FREE",
                 price: "$0",
-                description: "Perfect for trying out TripAI",
+                description: "Perfect for trying out Trip Genie",
                 features: [
                   "Plan trips up to 5 days",
                   "3 AI Trip Itineraries",
@@ -437,7 +437,7 @@ export default function Home() {
 
             <p className="mx-auto mt-8 max-w-2xl text-xl leading-relaxed text-muted-foreground sm:text-2xl">
               Join thousands of happy travelers who have discovered their
-              perfect trips with TripAI.
+              perfect trips with Trip Genie.
             </p>
 
             <div className="mt-12 flex flex-wrap justify-center gap-4">

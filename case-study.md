@@ -167,7 +167,7 @@ While maintaining a user-friendly interface, Trip Genie incorporates several inn
 ## Conclusion
 
 ![Trip Genie Platform Overview](./case-study-images/platform-overview.png)
-_A comprehensive view of TripAI's interface showing the seamless connection between AI technology and user-friendly design._
+_A comprehensive view of Trip Genie's interface showing the seamless connection between AI technology and user-friendly design._
 
 Trip Genie demonstrates how artificial intelligence can transform traditional travel planning into an efficient, enjoyable experience. By combining cutting-edge technology with user-centric design, the platform sets new standards for digital travel planning tools.
 

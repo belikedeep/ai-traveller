@@ -12,7 +12,7 @@ export const metadata: Metadata = {
       "Plan your perfect trip in minutes with our AI travel planner. Get personalized recommendations tailored to your preferences.",
     type: "website",
     locale: "en_US",
-    url: "https://tripai.com/create-trip",
+    url: "https://www.tripgenie.pro/create-trip",
   },
   twitter: {
     card: "summary_large_image",

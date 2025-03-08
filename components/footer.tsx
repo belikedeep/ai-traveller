@@ -9,7 +9,9 @@ const Footer = () => {
           <div className="space-y-4">
             <Link href="/" className="flex items-center group">
               <Plane className="h-6 w-6 text-indigo-600 mr-2 transition-transform duration-200 group-hover:translate-x-1" />
-              <span className="text-foreground font-bold text-lg">TripAI</span>
+              <span className="text-foreground font-bold text-lg">
+                Trip Genie
+              </span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Making travel planning smarter, faster, and more personalized with
@@ -128,8 +130,8 @@ const Footer = () => {
 
         <div className="mt-12 pt-8 border-t border-border/40">
           <p className="text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} TripAI. All rights reserved. Made
-            with ❤️
+            &copy; {new Date().getFullYear()} Trip Genie. All rights reserved.
+            Made with ❤️
           </p>
         </div>
       </div>
