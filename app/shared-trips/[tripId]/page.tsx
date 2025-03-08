@@ -1,14 +1,13 @@
-import type { NextPage } from "next";
-import { redirect } from "next/navigation";
+import ClientPage from "@/components/shared-trip/ClientPage";
 
 interface PageProps {
-  params: Promise<{ tripId: string }>;
+  params: Promise<{
+    tripId: string;
+  }>;
 }
 
-const Page: NextPage<PageProps> = async ({ params }) => {
-  const { tripId } = await params;
-  redirect(`/create-trip?tripId=${tripId}`);
-  return null;
-};
-
-export default Page;
+// Server Component
+export default async function SharedTripPage(props: PageProps) {
+  const { tripId } = await props.params;
+  return <ClientPage tripId={tripId} />;
+}

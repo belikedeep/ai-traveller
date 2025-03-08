@@ -5,17 +5,8 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/service/FirebaseConfig";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  CalendarDays,
-  Loader2,
-  Map,
-  Plus,
-  Users,
-  Wallet,
-  RefreshCw,
-} from "lucide-react";
+import { CalendarDays, Loader2, Map, Plus, Users, Wallet } from "lucide-react";
 import Link from "next/link";
-import { syncUserAuth } from "@/lib/auth-utils";
 
 interface TripUserSelection {
   location: {
@@ -49,48 +40,50 @@ interface Trip {
   userEmail: string;
 }
 
-export default function MyTripsPage() {
+interface User {
+  email: string;
+}
+
+export default function TripsClient() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
-  const fetchTrips = async () => {
-    setLoading(true);
-    setError(null);
-
-    const userData = syncUserAuth();
-    if (!userData) {
-      router.replace("/");
-      return;
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
     }
-
-    try {
-      const q = query(
-        collection(db, "AITrips"),
-        where("userEmail", "==", userData.email)
-      );
-
-      const querySnapshot = await getDocs(q);
-      const tripsData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Trip[];
-
-      setTrips(tripsData);
-    } catch (err) {
-      console.error("Error fetching trips:", err);
-      setError("Failed to load trips");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchTrips();
-  }, [router]);
+    const fetchTrips = async () => {
+      try {
+        if (!user) return;
 
-  // Loading state
+        const q = query(
+          collection(db, "AITrips"),
+          where("userEmail", "==", user?.email)
+        );
+
+        const querySnapshot = await getDocs(q);
+        const tripsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Trip[];
+
+        setTrips(tripsData);
+      } catch (error) {
+        console.error("Error fetching trips:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrips();
+  }, [user]);
+
   if (loading) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-4">
@@ -100,20 +93,20 @@ export default function MyTripsPage() {
     );
   }
 
-  // Error state
-  if (error) {
+  if (!user) {
     return (
-      <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-4">
-        <p className="text-lg text-red-500">{error}</p>
-        <Button onClick={fetchTrips} className="gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Try Again
-        </Button>
+      <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-6">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-semibold">Welcome to TripAI</h2>
+          <p className="text-muted-foreground">
+            Please sign in to view your trips
+          </p>
+        </div>
+        <Button onClick={() => router.push("/")}>Sign In</Button>
       </div>
     );
   }
 
-  // Empty state
   if (trips.length === 0) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-6">
@@ -133,7 +126,6 @@ export default function MyTripsPage() {
     );
   }
 
-  // Trips list
   return (
     <div className="container mx-auto py-12 px-4">
       <div className="flex items-center justify-between mb-8">

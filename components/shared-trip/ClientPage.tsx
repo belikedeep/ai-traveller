@@ -8,6 +8,7 @@ import InfoSection from "@/components/trip/InfoSection";
 import Hotels from "@/components/trip/Hotels";
 import PlacesToVisit from "@/components/trip/PlacesToVisit";
 import SignInRequired from "@/components/ui/SignInRequired";
+import { syncUserAuth } from "@/lib/auth-utils";
 
 interface TripData {
   id: string;
@@ -44,15 +45,11 @@ interface TripData {
   };
 }
 
-interface PageParams {
+export interface ClientPageProps {
   tripId: string;
 }
 
-export interface ClientPageProps {
-  params: PageParams;
-}
-
-export default function ClientPage({ params }: ClientPageProps) {
+export default function ClientPage({ tripId }: ClientPageProps) {
   const [trip, setTrip] = useState<TripData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +57,10 @@ export default function ClientPage({ params }: ClientPageProps) {
 
   const fetchTrip = useCallback(async () => {
     try {
-      const tripRef = doc(db, "AITrips", params.tripId);
+      setLoading(true);
+      setError(null);
+
+      const tripRef = doc(db, "AITrips", tripId);
       const tripSnap = await getDoc(tripRef);
 
       if (!tripSnap.exists()) {
@@ -77,44 +77,50 @@ export default function ClientPage({ params }: ClientPageProps) {
         tripOwnerSnap.exists() &&
         ["PRO", "PREMIUM"].includes(tripOwnerSnap.data().plan);
 
-      if (!isPublic) {
-        // Check if user is authenticated
-        const localUser = localStorage.getItem("user");
-        if (!localUser) {
-          setRequiresAuth(true);
-          return;
-        }
+      const userData = syncUserAuth();
+      if (!isPublic && !userData) {
+        setRequiresAuth(true);
+        return;
       }
 
       setTrip({
         ...tripData,
         id: tripSnap.id,
       });
+      setRequiresAuth(false);
     } catch (err) {
       setError("Failed to load trip");
       console.error("Error fetching trip:", err);
     } finally {
       setLoading(false);
     }
-  }, [params.tripId]);
+  }, [tripId]);
 
+  // Initial load and check for auth changes
   useEffect(() => {
     fetchTrip();
+
+    // Listen for auth changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "user") {
+        fetchTrip();
+      }
+    };
+
+    const handleAuthChange = () => {
+      fetchTrip();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("auth-change", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("auth-change", handleAuthChange);
+    };
   }, [fetchTrip]);
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-muted-foreground">Loading trip details...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Authentication required state
+  // Authentication required state - show this first
   if (requiresAuth) {
     return (
       <div className="min-h-screen bg-background">
@@ -122,6 +128,18 @@ export default function ClientPage({ params }: ClientPageProps) {
           message="This trip requires authentication to view. Please sign in to continue."
           onSignIn={fetchTrip}
         />
+      </div>
+    );
+  }
+
+  // Loading state
+  if (loading && !error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+          <p className="text-muted-foreground">Loading trip details...</p>
+        </div>
       </div>
     );
   }

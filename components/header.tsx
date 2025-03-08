@@ -16,34 +16,40 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { initializeUser, getUser } from "@/service/UserService";
-import type { User } from "@/service/UserService";
-
-interface UserProfile extends Omit<User, "credits"> {
-  credits?: number;
-}
+import {
+  syncUserAuth,
+  setUserCookie,
+  setUserStorage,
+  clearUserAuth,
+  type User,
+} from "@/lib/auth-utils";
 
 interface TokenInfo {
   access_token: string;
 }
 
 export default function Header() {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
 
   const checkUserAndCredits = async () => {
-    const userData = localStorage.getItem("user");
+    const userData = syncUserAuth();
     if (userData) {
-      const parsedUser = JSON.parse(userData);
       // Get latest credits from Firestore
-      const firestoreUser = await getUser(parsedUser.email);
+      const firestoreUser = await getUser(userData.email);
       if (firestoreUser) {
-        const updatedUser = { ...parsedUser, credits: firestoreUser.credits };
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+        const updatedUser = {
+          ...userData,
+          credits: firestoreUser.credits,
+          plan: firestoreUser.plan,
+        };
+        setUserStorage(updatedUser);
+        setUserCookie(updatedUser);
         setUser(updatedUser);
       } else {
-        setUser(parsedUser);
+        setUser(userData);
       }
     }
   };
@@ -52,12 +58,12 @@ export default function Header() {
     checkUserAndCredits();
 
     // Set up periodic credit check
-    const creditCheckInterval = setInterval(checkUserAndCredits, 10000); // Check every 10 seconds
+    const creditCheckInterval = setInterval(checkUserAndCredits, 10000);
 
     // Listen for storage changes and credit updates
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "user" && e.newValue) {
-        setUser(JSON.parse(e.newValue));
+      if (e.key === "user") {
+        checkUserAndCredits();
       }
     };
 
@@ -88,7 +94,6 @@ export default function Header() {
       document.body.style.overflow = "";
     }
 
-    // Add event listener for route changes
     window.addEventListener("popstate", handleRouteChange);
 
     return () => {
@@ -105,7 +110,7 @@ export default function Header() {
 
   const GetUserProfile = async (tokenInfo: TokenInfo) => {
     try {
-      const response = await axios.get<UserProfile>(
+      const response = await axios.get<User>(
         `https://www.googleapis.com/oauth2/v1/userinfo`,
         {
           headers: {
@@ -125,23 +130,82 @@ export default function Header() {
       const userWithCredits = {
         ...googleUser,
         credits: firestoreUser.credits,
+        plan: firestoreUser.plan,
       };
 
-      localStorage.setItem("user", JSON.stringify(userWithCredits));
+      // Store user data in both localStorage and cookie
+      setUserStorage(userWithCredits);
+      setUserCookie(userWithCredits);
       setUser(userWithCredits);
       setOpenDialog(false);
-      setIsMobileMenuOpen(false); // Close mobile menu after login
+      setIsMobileMenuOpen(false);
+
+      // Dispatch auth change event
+      window.dispatchEvent(new Event("auth-change"));
     } catch (err) {
       console.error("Error fetching user profile:", err);
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    clearUserAuth();
     setUser(null);
     router.push("/");
-    setIsMobileMenuOpen(false); // Close mobile menu after logout
+    setIsMobileMenuOpen(false);
   };
+
+  const renderUserMenu = () => (
+    <>
+      <Link href="/pricing">
+        <Button
+          variant="outline"
+          className="text-foreground hover:bg-accent transition-colors duration-200"
+        >
+          💰 {user?.credits ?? 0} Credits
+        </Button>
+      </Link>
+      <Link href="/create-trip">
+        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-indigo-600/40">
+          ✨ Create Trip
+        </Button>
+      </Link>
+      <Link href="/my-trips">
+        <Button
+          variant="ghost"
+          className="text-foreground hover:bg-accent transition-colors duration-200"
+        >
+          My Trips
+        </Button>
+      </Link>
+      <Popover>
+        <PopoverTrigger>
+          <div className="relative group">
+            <Image
+              src={user?.picture || ""}
+              width={40}
+              height={40}
+              className="rounded-full cursor-pointer border-2 border-border/40 transition-all duration-200 group-hover:border-indigo-600 group-hover:scale-105"
+              alt={user?.name || "User"}
+            />
+            <div className="absolute inset-0 rounded-full bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="bg-background/95 backdrop-blur-sm border-border/40 shadow-xl">
+          <div className="p-3">
+            <p className="font-medium text-foreground">{user?.name}</p>
+            <p className="text-sm text-muted-foreground">{user?.email}</p>
+            <Button
+              variant="ghost"
+              className="w-full mt-3 hover:bg-accent text-foreground transition-colors duration-200"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </>
+  );
 
   return (
     <header className="bg-background/80 backdrop-blur-md border-b border-border/40 sticky top-0 z-50 gap-0 h-16">
@@ -177,58 +241,7 @@ export default function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex lg:items-center lg:gap-6">
           {user ? (
-            <>
-              <Link href="/pricing">
-                <Button
-                  variant="outline"
-                  className="text-foreground hover:bg-accent transition-colors duration-200"
-                >
-                  💰 {user.credits ?? 0} Credits
-                </Button>
-              </Link>
-              <Link href="/create-trip">
-                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-indigo-600/40">
-                  ✨ Create Trip
-                </Button>
-              </Link>
-              <Link href="/my-trips">
-                <Button
-                  variant="ghost"
-                  className="text-foreground hover:bg-accent transition-colors duration-200"
-                >
-                  My Trips
-                </Button>
-              </Link>
-              <Popover>
-                <PopoverTrigger>
-                  <div className="relative group">
-                    <Image
-                      src={user.picture}
-                      width={40}
-                      height={40}
-                      className="rounded-full cursor-pointer border-2 border-border/40 transition-all duration-200 group-hover:border-indigo-600 group-hover:scale-105"
-                      alt={user.name}
-                    />
-                    <div className="absolute inset-0 rounded-full bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent className="bg-background/95 backdrop-blur-sm border-border/40 shadow-xl">
-                  <div className="p-3">
-                    <p className="font-medium text-foreground">{user.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {user.email}
-                    </p>
-                    <Button
-                      variant="ghost"
-                      className="w-full mt-3 hover:bg-accent text-foreground transition-colors duration-200"
-                      onClick={handleLogout}
-                    >
-                      Logout
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </>
+            renderUserMenu()
           ) : (
             <Button
               onClick={() => setOpenDialog(true)}
@@ -240,7 +253,7 @@ export default function Header() {
         </nav>
       </div>
 
-      {/* Mobile Menu - Using fixed positioning with proper z-index */}
+      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 bg-background/95 backdrop-blur-md z-50 flex -top-2 flex-col">
           <div className="flex justify-between items-center p-4 border-b border-border/40">
