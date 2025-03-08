@@ -7,12 +7,6 @@ import { Loader2 } from "lucide-react";
 import InfoSection from "@/components/trip/InfoSection";
 import Hotels from "@/components/trip/Hotels";
 import PlacesToVisit from "@/components/trip/PlacesToVisit";
-<<<<<<< HEAD
-import SignInRequired from "@/components/ui/SignInRequired";
-import { syncUserAuth } from "@/lib/auth-utils";
-=======
->>>>>>> 57db0da88481b6a9802b7e687d17a707f3ba8c97
-
 interface TripData {
   id: string;
   userEmail: string;
@@ -48,20 +42,20 @@ interface TripData {
   };
 }
 
-export interface ClientPageProps {
-  tripId: string;
+interface SharedTripPageProps {
+  params: {
+    tripId: string;
+  };
 }
 
-export default function ClientPage({ tripId }: ClientPageProps) {
+export default function SharedTripPageClient({ params }: SharedTripPageProps) {
   const [trip, setTrip] = useState<TripData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const fetchTrip = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
-
-      const tripRef = doc(db, "AITrips", tripId);
+      const tripRef = doc(db, "AITrips", params.tripId);
       const tripSnap = await getDoc(tripRef);
 
       if (!tripSnap.exists()) {
@@ -70,84 +64,24 @@ export default function ClientPage({ tripId }: ClientPageProps) {
       }
 
       const tripData = tripSnap.data() as Omit<TripData, "id">;
-<<<<<<< HEAD
-      const tripOwnerRef = doc(db, "users", tripData.userEmail);
-      const tripOwnerSnap = await getDoc(tripOwnerRef);
-
-      // Check if owner is PRO/PREMIUM for public access
-      const isPublic =
-        tripOwnerSnap.exists() &&
-        ["PRO", "PREMIUM"].includes(tripOwnerSnap.data().plan);
-
-      const userData = syncUserAuth();
-      if (!isPublic && !userData) {
-        setRequiresAuth(true);
-        return;
-      }
-=======
-      // For shared trip URLs, allow access regardless of the owner's plan
       setTrip({
         ...tripData,
         id: tripSnap.id,
       });
->>>>>>> 57db0da88481b6a9802b7e687d17a707f3ba8c97
-
-      setTrip({
-        ...tripData,
-        id: tripSnap.id,
-      });
-      setRequiresAuth(false);
     } catch (err) {
       setError("Failed to load trip");
       console.error("Error fetching trip:", err);
     } finally {
       setLoading(false);
     }
-  }, [tripId]);
+  }, [params.tripId]);
 
-  // Initial load and check for auth changes
   useEffect(() => {
     fetchTrip();
-
-    // Listen for auth changes
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "user") {
-        fetchTrip();
-      }
-    };
-
-    const handleAuthChange = () => {
-      fetchTrip();
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("auth-change", handleAuthChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("auth-change", handleAuthChange);
-    };
   }, [fetchTrip]);
 
-<<<<<<< HEAD
-  // Authentication required state - show this first
-  if (requiresAuth) {
-    return (
-      <div className="min-h-screen bg-background">
-        <SignInRequired
-          message="This trip requires authentication to view. Please sign in to continue."
-          onSignIn={fetchTrip}
-        />
-      </div>
-    );
-  }
-
-  // Loading state
-  if (loading && !error) {
-=======
   // Loading state
   if (loading) {
->>>>>>> 57db0da88481b6a9802b7e687d17a707f3ba8c97
     return (
       <div className="min-h-screen bg-background">
         <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
