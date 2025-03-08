@@ -1,6 +1,6 @@
 # Case Study Images
 
-This directory contains screenshots and visual elements used in the TripAI case study. Follow these guidelines to capture consistent, high-quality screenshots:
+This directory contains screenshots and visual elements used in the Trip Genie case study. Follow these guidelines to capture consistent, high-quality screenshots:
 
 ## Required Screenshots
 

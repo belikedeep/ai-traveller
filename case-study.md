@@ -1,11 +1,11 @@
-# TripAI: AI-Powered Travel Planning Platform
+# Trip Genie: AI-Powered Travel Planning Platform
 
-![TripAI Hero Section](./case-study-images/hero.png)
+![Trip Genie Hero Section](./case-study-images/hero.png)
 _The welcoming hero section features an elegant gradient background with the tagline "Your Perfect Trip, Planned by AI" and a compelling call-to-action._
 
 ## Overview
 
-In today's fast-paced world, planning the perfect trip can be overwhelming. Travelers often spend countless hours researching destinations, creating itineraries, and trying to balance their preferences with budget constraints. TripAI emerged as a solution to this challenge, leveraging artificial intelligence to transform the travel planning experience.
+In today's fast-paced world, planning the perfect trip can be overwhelming. Travelers often spend countless hours researching destinations, creating itineraries, and trying to balance their preferences with budget constraints. Trip Genie emerged as a solution to this challenge, leveraging artificial intelligence to transform the travel planning experience.
 
 ## The Challenge
 
@@ -18,11 +18,11 @@ Traditional travel planning faces several key challenges:
 
 ## The Solution
 
-TripAI revolutionizes travel planning through an intuitive, AI-powered platform that creates personalized itineraries in minutes. The platform combines advanced AI technology with a user-friendly interface to deliver tailored travel experiences.
+Trip Genie revolutionizes travel planning through an intuitive, AI-powered platform that creates personalized itineraries in minutes. The platform combines advanced AI technology with a user-friendly interface to deliver tailored travel experiences.
 
 ### Key Features
 
-![TripAI Features Section](./case-study-images/features.png)
+![Trip Genie Features Section](./case-study-images/features.png)
 _Three key features showcased with custom icons and modern card design, highlighting AI recommendations, time efficiency, and customization options._
 
 🎯 **AI-Powered Recommendations**
@@ -78,7 +78,7 @@ The platform offers a seamless 4-step process:
 ![Pricing Plans](./case-study-images/pricing.png)
 _Clean and transparent pricing structure with three tiers - Basic, Pro, and Premium, featuring hover effects and clear value propositions._
 
-TripAI operates on a freemium model with three tier options:
+Trip Genie operates on a freemium model with three tier options:
 
 **FREE PLAN**
 
@@ -135,7 +135,7 @@ This generous pricing model ensures accessibility while providing value at each 
 
 ## Future Scope
 
-TripAI continues to evolve with planned enhancements:
+Trip Genie continues to evolve with planned enhancements:
 
 1. **Extended Duration Planning**
 
@@ -156,7 +156,7 @@ TripAI continues to evolve with planned enhancements:
 
 ## Technical Innovation
 
-While maintaining a user-friendly interface, TripAI incorporates several innovative technical features:
+While maintaining a user-friendly interface, Trip Genie incorporates several innovative technical features:
 
 - **Responsive Design**: Seamless experience across all devices
 - **Real-time Updates**: Dynamic itinerary modifications
@@ -166,9 +166,9 @@ While maintaining a user-friendly interface, TripAI incorporates several innovat
 
 ## Conclusion
 
-![TripAI Platform Overview](./case-study-images/platform-overview.png)
+![Trip Genie Platform Overview](./case-study-images/platform-overview.png)
 _A comprehensive view of TripAI's interface showing the seamless connection between AI technology and user-friendly design._
 
-TripAI demonstrates how artificial intelligence can transform traditional travel planning into an efficient, enjoyable experience. By combining cutting-edge technology with user-centric design, the platform sets new standards for digital travel planning tools.
+Trip Genie demonstrates how artificial intelligence can transform traditional travel planning into an efficient, enjoyable experience. By combining cutting-edge technology with user-centric design, the platform sets new standards for digital travel planning tools.
 
-The success of TripAI showcases the potential of AI in enhancing everyday tasks, making sophisticated travel planning accessible to everyone. As the platform continues to evolve, it remains committed to its core mission: making travel planning effortless and enjoyable for all users.
+The success of Trip Genie showcases the potential of AI in enhancing everyday tasks, making sophisticated travel planning accessible to everyone. As the platform continues to evolve, it remains committed to its core mission: making travel planning effortless and enjoyable for all users.

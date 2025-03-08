@@ -1,13 +1,13 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "My Travel Itineraries | TripAI Dashboard",
+  title: "My Travel Itineraries | Trip Genie Dashboard",
   description:
     "View and manage your AI-generated travel itineraries. Access your personalized trip plans, modify your schedules, and create new adventures.",
   keywords:
     "travel dashboard, trip management, itinerary manager, travel plans, AI travel planner",
   openGraph: {
-    title: "My Travel Itineraries | TripAI Dashboard",
+    title: "My Travel Itineraries | Trip Genie Dashboard",
     description:
       "Manage your AI-generated travel itineraries and plan new adventures.",
     type: "website",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "TripAI Travel Dashboard",
+    title: "Trip Genie Travel Dashboard",
     description:
       "Manage your AI-generated travel itineraries and plan new adventures.",
   },
