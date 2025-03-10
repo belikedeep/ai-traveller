@@ -124,6 +124,36 @@ const Footer = () => {
                   </span>
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    Terms and Conditions 📜
+                  </span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/cancellation"
+                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    Cancellation and Refund 💸
+                  </span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shipping"
+                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                >
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">
+                    Shipping and Delivery 🚚
+                  </span>
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
