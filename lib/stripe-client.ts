@@ -1,13 +1,8 @@
-import { loadStripe } from "@stripe/stripe-js";
+import Razorpay from "razorpay";
 
-export const getStripe = async () => {
-  const stripe = await loadStripe(
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-  );
-
-  if (!stripe) {
-    throw new Error("Failed to initialize Stripe");
-  }
-
-  return stripe;
+export const getRazorpay = () => {
+  return new Razorpay({
+    key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+    key_secret: process.env.NEXT_PUBLIC_RAZORPAY_KEY_SECRET!,
+  });
 };

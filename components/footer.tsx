@@ -1,4 +1,4 @@
-import { Plane } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 const Footer = () => {
@@ -8,7 +8,13 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-4">
             <Link href="/" className="flex items-center group">
-              <Plane className="h-6 w-6 text-indigo-600 mr-2 transition-transform duration-200 group-hover:translate-x-1" />
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={40}
+                height={40}
+                className="cursor-pointer transition-transform duration-200 group-hover:scale-110"
+              />{" "}
               <span className="text-foreground font-bold text-lg">
                 Trip Genie
               </span>

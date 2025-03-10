@@ -175,9 +175,7 @@ export default function Header() {
             height={40}
             className="cursor-pointer transition-transform duration-200 group-hover:scale-110"
           />
-          <span className="ml-3 text-foreground font-bold text-lg">
-            Trip Genie
-          </span>
+          <span className="text-foreground font-bold text-lg">Trip Genie</span>
         </Link>
 
         {/* Mobile Menu Button */}
@@ -276,7 +274,7 @@ export default function Header() {
                 height={40}
                 className="cursor-pointer transition-transform duration-200 group-hover:scale-110"
               />
-              <span className="ml-3 text-foreground font-bold text-lg">
+              <span className=" text-foreground font-bold text-lg">
                 Trip Genie
               </span>
             </Link>

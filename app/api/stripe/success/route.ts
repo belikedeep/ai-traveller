@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stripe, STRIPE_PLANS } from "@/lib/stripe";
+import { RAZORPAY_PLANS } from "@/lib/stripe";
+import { razorpay } from "@/lib/razorpay-server";
 import {
   getUser,
   updateUserCredits,
@@ -9,21 +10,21 @@ import {
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
-    const sessionId = searchParams.get("session_id");
+    const orderId = searchParams.get("order_id");
     const plan = searchParams.get("plan");
     const email = searchParams.get("email");
 
-    if (!sessionId || !plan || !email) {
+    if (!orderId || !plan || !email) {
       return NextResponse.json(
         { error: "Missing required parameters" },
         { status: 400 }
       );
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const payment = await razorpay.payments.fetch(orderId);
 
     // Verify payment status
-    if (session.payment_status !== "paid") {
+    if (payment.status !== "captured") {
       return NextResponse.json(
         { error: "Payment not completed" },
         { status: 400 }
@@ -31,7 +32,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get plan details
-    const planDetails = STRIPE_PLANS[plan as keyof typeof STRIPE_PLANS];
+    const planDetails = RAZORPAY_PLANS[plan as keyof typeof RAZORPAY_PLANS];
     if (!planDetails) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }

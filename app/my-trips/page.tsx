@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/service/FirebaseConfig";
 import { useRouter } from "next/navigation";
@@ -55,7 +55,7 @@ export default function MyTripsPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const fetchTrips = async () => {
+  const fetchTrips = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -84,11 +84,11 @@ export default function MyTripsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     fetchTrips();
-  }, [router]);
+  }, [fetchTrips]);
 
   // Loading state
   if (loading) {

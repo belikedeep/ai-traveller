@@ -1,18 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { getStripe } from "@/lib/stripe-client";
 import { useEffect, useState, Suspense, type ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "next/navigation";
-import { STRIPE_PLANS } from "@/lib/stripe";
+import { RAZORPAY_PLANS } from "@/lib/stripe";
 import { Loader2 } from "lucide-react";
 import { PLAN_LIMITS } from "@/service/UserService";
 
 const PRICING_PLANS = [
   {
     name: "FREE",
-    credits: STRIPE_PLANS.FREE.credits,
+    credits: RAZORPAY_PLANS.FREE.credits,
     price: "$0",
     features: [
       "Plan trips up to 5 days",
@@ -24,8 +23,8 @@ const PRICING_PLANS = [
   },
   {
     name: "PRO",
-    credits: STRIPE_PLANS.PRO.credits,
-    price: `$${STRIPE_PLANS.PRO.price / 100}`,
+    credits: RAZORPAY_PLANS.PRO.credits,
+    price: `$${RAZORPAY_PLANS.PRO.price / 100}`,
     features: [
       "Everything from Free",
       "Plan trips up to 15 days",
@@ -39,8 +38,8 @@ const PRICING_PLANS = [
   },
   {
     name: "PREMIUM",
-    credits: STRIPE_PLANS.PREMIUM.credits,
-    price: `$${STRIPE_PLANS.PREMIUM.price / 100}`,
+    credits: RAZORPAY_PLANS.PREMIUM.credits,
+    price: `$${RAZORPAY_PLANS.PREMIUM.price / 100}`,
     features: [
       "Everything from Pro",
       "Plan trips up to 15 days",
@@ -70,12 +69,26 @@ function PricingPageContent(): ReactNode {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setUserData(JSON.parse(user));
-    } else {
-      window.location.href = "/";
-    }
+    const loadRazorpayScript = () => {
+      return new Promise<void>((resolve) => {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        script.onload = () => resolve();
+        document.body.appendChild(script);
+      });
+    };
+
+    const initUser = () => {
+      const user = localStorage.getItem("user");
+      if (user) {
+        setUserData(JSON.parse(user));
+      } else {
+        window.location.href = "/";
+      }
+    };
+
+    loadRazorpayScript().then(initUser);
   }, []);
 
   useEffect(() => {
@@ -146,20 +159,27 @@ function PricingPageContent(): ReactNode {
         }),
       });
 
-      const { sessionId, error } = await response.json();
+      const { orderId, error } = await response.json();
 
       if (error) {
         throw new Error(error);
       }
 
-      const stripe = await getStripe();
-      const { error: stripeError } = await stripe.redirectToCheckout({
-        sessionId,
-      });
+      const razorpayOptions = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+        amount: RAZORPAY_PLANS[planName as keyof typeof RAZORPAY_PLANS].price,
+        currency:
+          RAZORPAY_PLANS[planName as keyof typeof RAZORPAY_PLANS].currency,
+        name: "AI Trip Planner",
+        description: `${planName} Credits Package`,
+        order_id: orderId,
+        handler: function (response: RazorpayResponse) {
+          window.location.href = `/api/stripe/success?order_id=${response.razorpay_payment_id}&plan=${planName}&email=${userData.email}`;
+        },
+      };
 
-      if (stripeError) {
-        throw new Error(stripeError.message);
-      }
+      const razorpay = new window.Razorpay(razorpayOptions);
+      razorpay.open();
     } catch (err) {
       toast({
         title: "Error",

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stripe, STRIPE_PLANS } from "@/lib/stripe";
+import { RAZORPAY_PLANS } from "@/lib/stripe";
+import { razorpay } from "@/lib/razorpay-server";
+import { nanoid } from "nanoid";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,42 +15,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const planDetails = STRIPE_PLANS[plan as keyof typeof STRIPE_PLANS];
+    const planDetails = RAZORPAY_PLANS[plan as keyof typeof RAZORPAY_PLANS];
     if (!planDetails) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: planDetails.currency,
-            product_data: {
-              name: `${plan} Credits Package`,
-              description: `${planDetails.credits} AI Trip Planner Credits`,
-            },
-            unit_amount: planDetails.price,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      success_url: `${req.headers.get(
-        "origin"
-      )}/api/stripe/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan}&email=${userEmail}`,
-      cancel_url: `${req.headers.get("origin")}/pricing`,
-      metadata: {
+    const options = {
+      amount: planDetails.price,
+      currency: planDetails.currency,
+      receipt: nanoid(),
+      payment_capture: 1,
+      notes: {
         credits: planDetails.credits.toString(),
         userEmail,
       },
-    });
+    };
 
-    return NextResponse.json({ sessionId: session.id });
+    const order = await razorpay.orders.create(options);
+
+    return NextResponse.json({ orderId: order.id });
   } catch (error) {
-    console.error("Stripe API Error:", error);
+    console.error("Razorpay API Error:", error);
     return NextResponse.json(
-      { error: "Failed to create checkout session" },
+      { error: "Failed to create order" },
       { status: 500 }
     );
   }
