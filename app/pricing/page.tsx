@@ -47,7 +47,7 @@ const PRICING_PLANS = [
       "All Destinations",
       "24/7 Priority Support",
       "Priority Queue",
-      "Advanced Trip Sharing Analytics",
+      // "Advanced Trip Sharing Analytics",
       "Unlimited Public Sharing",
     ],
   },
