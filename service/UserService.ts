@@ -27,7 +27,7 @@ export const initializeUser = async (
     // Create new user with initial credits
     await setDoc(userRef, {
       ...userData,
-      credits: 0,
+      credits: 3,
       plan: "FREE" as PlanType, // Always store in uppercase
     });
   }
