@@ -315,23 +315,10 @@ export default function Home() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3 lg:gap-12">
             {[
               {
-                name: "FREE",
-                price: "$0",
-                description: "Perfect for trying out Trip Genie",
-                features: [
-                  "Plan trips up to 5 days",
-                  "3 AI Trip Itineraries",
-                  "Popular Destinations",
-                  "Basic Support",
-                  "Authenticated Sharing (Sign-in required)",
-                ],
-              },
-              {
                 name: "PRO",
-                price: "$5",
+                price: "$0.99",
                 description: "Great for regular travelers",
                 features: [
-                  "Everything from Free",
                   "Plan trips up to 15 days",
                   "15 AI Trip Itineraries",
                   "All Destinations",
@@ -343,7 +330,7 @@ export default function Home() {
               },
               {
                 name: "PREMIUM",
-                price: "$10",
+                price: "$4.99",
                 description: "For serious travel enthusiasts",
                 features: [
                   "Everything from Pro",
@@ -352,7 +339,6 @@ export default function Home() {
                   "All Destinations",
                   "24/7 Priority Support",
                   "Priority Queue",
-                  "Advanced Trip Sharing Analytics",
                   "Unlimited Public Sharing",
                 ],
               },
@@ -450,7 +436,7 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-indigo-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                   <div className="relative flex items-center">
                     <span>
-                      Create Your Free Itinerary{" "}
+                      Start Planning Now{" "}
                       <span className="inline-block animate-pulse">✨</span>
                     </span>
                     <ArrowRight className="ml-2 h-6 w-6 transition-transform group-hover:translate-x-1" />
@@ -460,7 +446,7 @@ export default function Home() {
             </div>
 
             <p className="mt-8 text-muted-foreground">
-              No credit card required • Start planning in minutes
+              Plans starting at $0.99 • Start planning in minutes
             </p>
           </div>
         </div>

@@ -10,23 +10,10 @@ import { PLAN_LIMITS } from "@/service/UserService";
 
 const PRICING_PLANS = [
   {
-    name: "FREE",
-    credits: RAZORPAY_PLANS.FREE.credits,
-    price: "$0",
-    features: [
-      "Plan trips up to 5 days",
-      "3 AI Trip Itineraries",
-      "Popular Destinations",
-      "Basic Support",
-      "Authenticated Sharing (Sign-in required)",
-    ],
-  },
-  {
     name: "PRO",
     credits: RAZORPAY_PLANS.PRO.credits,
     price: `$${RAZORPAY_PLANS.PRO.price / 100}`,
     features: [
-      "Everything from Free",
       "Plan trips up to 15 days",
       "15 AI Trip Itineraries",
       "All Destinations",
@@ -47,7 +34,6 @@ const PRICING_PLANS = [
       "All Destinations",
       "24/7 Priority Support",
       "Priority Queue",
-      // "Advanced Trip Sharing Analytics",
       "Unlimited Public Sharing",
     ],
   },
@@ -259,8 +245,7 @@ function PricingPageContent(): ReactNode {
                   </li>
                 ))}
               </ul>
-              {/* Show purchase button only for Pro and Premium plans when user is signed in */}
-              {userData && plan.name !== "FREE" ? (
+              {userData ? (
                 <Button
                   className="w-full"
                   disabled={loading}
@@ -276,10 +261,6 @@ function PricingPageContent(): ReactNode {
                   ) : (
                     `Get ${plan.credits} Credits`
                   )}
-                </Button>
-              ) : plan.name === "FREE" ? (
-                <Button className="w-full" variant="outline" size="lg" disabled>
-                  Free Plan
                 </Button>
               ) : (
                 <Button

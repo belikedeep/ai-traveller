@@ -422,7 +422,7 @@ export default function CreateTripPage() {
                   console.log("Days Input - Plan limit:", planLimit);
                   return (
                     <Input
-                      placeholder={`Number of days (max ${planLimit} for ${userPlan} plan)`}
+                      placeholder={`Number of days (max 15 days)`}
                       type="number"
                       min="1"
                       max={planLimit}

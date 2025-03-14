@@ -1,17 +1,12 @@
 export const RAZORPAY_PLANS = {
-  FREE: {
-    credits: 3,
-    price: 0, // ₹0
-    currency: "INR",
-  },
   PRO: {
     credits: 15,
-    price: 500, // $5.00
+    price: 99, // $0.99
     currency: "USD",
   },
   PREMIUM: {
     credits: 50,
-    price: 1000, // $10.00
+    price: 499, // $4.99
     currency: "USD",
   },
 };
