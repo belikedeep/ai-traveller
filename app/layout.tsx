@@ -9,7 +9,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import Header from "@/components/header";
-import Footer from "@/components/footer";
+// import Footer from "@/components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

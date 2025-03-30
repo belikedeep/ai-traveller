@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import CustomDialog from "@/components/ui/CustomDialog";
 import { FcGoogle } from "react-icons/fc";
-import { Menu, X, Home, Plus, CreditCard, Map, LogOut } from "lucide-react";
+import { Menu, X, Plus, CreditCard, Map, LogOut } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import Image from "next/image";
