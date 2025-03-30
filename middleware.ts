@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 const PUBLIC_PATHS = ["/"];
 
 // Define paths that require authentication
-const PROTECTED_PATHS = ["/my-trips", "/create-trip", "/pricing"];
+const PROTECTED_PATHS = ["/my-trips", "/pricing"];
 
 export function middleware(request: NextRequest) {
   const userCookie = request.cookies.get("user");

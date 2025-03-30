@@ -4,7 +4,16 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import CustomDialog from "@/components/ui/CustomDialog";
 import { FcGoogle } from "react-icons/fc";
-import { Menu, X, Plus, CreditCard, Map, LogOut } from "lucide-react";
+import {
+  Menu,
+  X,
+  Plus,
+  CreditCard,
+  Map,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import Image from "next/image";
@@ -27,6 +36,8 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] =
+    useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -170,30 +181,58 @@ export default function Header() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-64 flex-col border-r border-border/40 bg-background/80 backdrop-blur-md z-30">
-        <div className="p-6">
-          <Link
-            href={user ? "/my-trips" : "/"}
-            className="flex items-center gap-2"
+      <aside
+        className={`hidden lg:flex fixed left-0 top-0 h-screen ${
+          isDesktopSidebarCollapsed ? "w-20" : "w-64"
+        } flex-col border-r border-border/40 bg-background/80 backdrop-blur-md z-30 transition-all duration-300`}
+      >
+        <div className="relative">
+          <div className="p-6">
+            <Link
+              href={user ? "/my-trips" : "/"}
+              className="flex items-center gap-2"
+            >
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={40}
+                height={40}
+                className="transition-transform duration-200 hover:scale-110"
+              />
+              {!isDesktopSidebarCollapsed && (
+                <span className="text-foreground font-bold text-lg">
+                  Trip Genie
+                </span>
+              )}
+            </Link>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute -right-3 top-6 bg-background border border-border/40"
+            onClick={() =>
+              setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)
+            }
           >
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={40}
-              height={40}
-              className="transition-transform duration-200 hover:scale-110"
-            />
-            <span className="text-foreground font-bold text-lg">
-              Trip Genie
-            </span>
-          </Link>
+            {isDesktopSidebarCollapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </Button>
         </div>
 
         <nav className="flex-1 p-4">
           {user ? (
             <div className="space-y-6">
               <div className="px-2">
-                <div className="flex items-center gap-3 mb-2">
+                <div
+                  className={`flex ${
+                    isDesktopSidebarCollapsed
+                      ? "justify-center"
+                      : "items-center gap-3"
+                  } mb-2`}
+                >
                   <Image
                     src={user.picture}
                     width={40}
@@ -201,20 +240,24 @@ export default function Header() {
                     className="rounded-full border-2 border-primary"
                     alt={user.name}
                   />
-                  <div>
-                    <p className="font-medium text-sm">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {user.email}
-                    </p>
-                  </div>
+                  {!isDesktopSidebarCollapsed && (
+                    <div>
+                      <p className="font-medium text-sm">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  )}
                 </div>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start mt-4"
-                  asChild
-                >
-                  <Link href="/pricing">💰 {user.credits ?? 0} Credits</Link>
-                </Button>
+                {!isDesktopSidebarCollapsed && (
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start mt-4"
+                    asChild
+                  >
+                    <Link href="/pricing">💰 {user.credits ?? 0} Credits</Link>
+                  </Button>
+                )}
               </div>
 
               <div className="space-y-1">
@@ -224,16 +267,20 @@ export default function Header() {
                     <Button
                       key={item.href}
                       variant="ghost"
-                      className={`w-full justify-start gap-2 ${
+                      className={`w-full ${
+                        isDesktopSidebarCollapsed
+                          ? "justify-center"
+                          : "justify-start gap-2"
+                      } ${
                         pathname === item.href
                           ? "bg-primary/10 text-primary"
                           : ""
                       }`}
                       asChild
                     >
-                      <Link href={item.href}>
+                      <Link href={item.href} title={item.label}>
                         <Icon className="h-4 w-4" />
-                        {item.label}
+                        {!isDesktopSidebarCollapsed && item.label}
                       </Link>
                     </Button>
                   );
@@ -254,11 +301,15 @@ export default function Header() {
           <div className="p-4 border-t border-border/40">
             <Button
               variant="ghost"
-              className="w-full justify-start gap-2"
+              className={`w-full ${
+                isDesktopSidebarCollapsed
+                  ? "justify-center"
+                  : "justify-start gap-2"
+              }`}
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4" />
-              Logout
+              {!isDesktopSidebarCollapsed && "Logout"}
             </Button>
           </div>
         )}
