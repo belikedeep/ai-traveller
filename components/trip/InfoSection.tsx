@@ -4,7 +4,7 @@ import { GetPlaceDetails, GetPlacePhoto } from "@/service/GlobalAPI";
 import Image from "next/image";
 import { useEffect, useState, useCallback, memo } from "react";
 import { MapPin, Calendar, Wallet2, Users } from "lucide-react";
-// import ShareTripDialog from "./ShareTripDialog";
+import { format } from "date-fns";
 
 interface TripProps {
   trip: {
@@ -13,6 +13,8 @@ interface TripProps {
       location: {
         label: string;
       };
+      startDate: string;
+      endDate: string;
       noOfDays: number;
       budget: string;
       travellingWith: string;
@@ -50,6 +52,22 @@ function InfoSection({ trip }: TripProps) {
     }
   }, [trip?.userSelection.location.label, fetchPlacePhoto]);
 
+  const formatDateRange = useCallback(() => {
+    try {
+      if (!trip?.userSelection.startDate || !trip?.userSelection.endDate)
+        return "";
+      const startDate = new Date(trip.userSelection.startDate);
+      const endDate = new Date(trip.userSelection.endDate);
+      return `${format(startDate, "MMM d")} - ${format(
+        endDate,
+        "MMM d, yyyy"
+      )}`;
+    } catch (error) {
+      console.error("Error formatting dates:", error);
+      return "";
+    }
+  }, [trip?.userSelection.startDate, trip?.userSelection.endDate]);
+
   return (
     <div className="rounded-2xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50">
       <div className="relative h-[400px] w-full">
@@ -77,7 +95,10 @@ function InfoSection({ trip }: TripProps) {
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm">
                 <Calendar className="h-4 w-4 text-primary" />
-                <span>{trip?.userSelection.noOfDays} Days</span>
+                <span>
+                  {formatDateRange()} ({trip?.userSelection.noOfDays}{" "}
+                  {trip?.userSelection.noOfDays === 1 ? "Day" : "Days"})
+                </span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm">
                 <Wallet2 className="h-4 w-4 text-primary" />
@@ -89,11 +110,6 @@ function InfoSection({ trip }: TripProps) {
               </div>
             </div>
           </div>
-
-          {/* <ShareTripDialog
-            tripId={trip.id || Date.now().toString()}
-            location={trip.userSelection.location.label}
-          /> */}
         </div>
       </div>
     </div>

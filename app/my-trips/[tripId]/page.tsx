@@ -13,6 +13,8 @@ interface TripData {
     location: {
       label: string;
     };
+    startDate: string;
+    endDate: string;
     noOfDays: number;
     budget: string;
     travellingWith: string;
