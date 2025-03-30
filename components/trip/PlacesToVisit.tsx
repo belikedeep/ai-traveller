@@ -92,12 +92,10 @@ function PlacesToVisit({ trip }: TripProps) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-8">
-        <h2 className="text-2xl font-semibold bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+        <h2 className="text-2xl font-semibold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
           Your Travel Itinerary
         </h2>
-        {loading && (
-          <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
-        )}
+        {loading && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
       </div>
 
       <div className="space-y-8">
@@ -108,16 +106,16 @@ function PlacesToVisit({ trip }: TripProps) {
           >
             <div className="p-6 border-b border-border/50 space-y-4">
               <div className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-indigo-500" />
+                <CalendarDays className="h-5 w-5 text-primary" />
                 <h3 className="text-xl font-semibold">{dayKey}</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-indigo-500" />
+                  <div className="h-2 w-2 rounded-full bg-primary" />
                   <span>Theme: {dayData.theme}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-indigo-500" />
+                  <Clock className="h-4 w-4 text-primary" />
                   <span>Best Time: {dayData.best_time_to_visit}</span>
                 </div>
               </div>
@@ -136,9 +134,9 @@ function PlacesToVisit({ trip }: TripProps) {
                     target="_blank"
                     className="block group"
                   >
-                    <div className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-indigo-500/10">
+                    <div className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/10">
                       <div className="relative aspect-video">
-                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent z-10" />
+                        <div className="absolute inset-0 z-10" />
                         {loading ? (
                           <div className="absolute inset-0 bg-background animate-pulse" />
                         ) : (
@@ -161,7 +159,7 @@ function PlacesToVisit({ trip }: TripProps) {
 
                       <div className="p-4 space-y-2">
                         <div className="flex items-center justify-between gap-2">
-                          <h4 className="font-semibold line-clamp-1 group-hover:text-indigo-400 transition-colors">
+                          <h4 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
                             {place.placeName}
                           </h4>
                           <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

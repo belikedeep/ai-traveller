@@ -94,7 +94,7 @@ export default function MyTripsPage() {
   if (loading) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="text-muted-foreground">Loading your adventures...</p>
       </div>
     );
@@ -104,8 +104,11 @@ export default function MyTripsPage() {
   if (error) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-4">
-        <p className="text-lg text-red-500">{error}</p>
-        <Button onClick={fetchTrips} className="gap-2">
+        <p className="text-lg text-destructive">{error}</p>
+        <Button
+          onClick={fetchTrips}
+          className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+        >
           <RefreshCw className="h-4 w-4" />
           Try Again
         </Button>
@@ -124,7 +127,7 @@ export default function MyTripsPage() {
           </p>
         </div>
         <Link href="/create-trip">
-          <Button className="gap-2">
+          <Button className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground">
             <Plus className="h-4 w-4" />
             Create New Trip
           </Button>
@@ -137,11 +140,11 @@ export default function MyTripsPage() {
   return (
     <div className="container mx-auto py-12 px-4">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-semibold bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+        <h1 className="text-3xl font-semibold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
           My Trips
         </h1>
         <Link href="/create-trip">
-          <Button variant="default" size="lg" className="gap-2">
+          <Button className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground">
             <Plus className="h-4 w-4" />
             New Trip
           </Button>
@@ -153,12 +156,12 @@ export default function MyTripsPage() {
           <div
             key={trip.id}
             onClick={() => router.push(`/my-trips/${trip.id}`)}
-            className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/10 cursor-pointer group"
+            className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/10 cursor-pointer group"
           >
             <div className="p-6 space-y-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-lg font-medium group-hover:text-indigo-400 transition-colors">
+                  <div className="flex items-center gap-2 text-lg font-medium group-hover:text-primary transition-colors">
                     <Map className="h-5 w-5" />
                     {trip.userSelection.location.label}
                   </div>

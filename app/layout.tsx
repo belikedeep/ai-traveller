@@ -101,7 +101,7 @@ export default function RootLayout({
         `}
       </Script>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased dark min-h-screen bg-gradient-to-b from-background via-background/95 to-background/90`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-b from-background via-background/95 to-background/90`}
       >
         <noscript>
           <img
@@ -116,16 +116,21 @@ export default function RootLayout({
           <GoogleOAuthProvider
             clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "dummy-id"}
           >
-            <div className="relative min-h-screen">
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
-              <div className="absolute inset-0 bg-gradient-to-tr from-background via-indigo-900/5 to-background -z-10" />
+            <div className="relative flex min-h-screen">
+              {/* Background gradients */}
+              <div className="fixed inset-0 bg-grid-white/[0.02] -z-10" />
+              <div className="fixed inset-0 bg-gradient-to-tr from-background via-primary/5 to-background -z-10" />
 
               <Header />
-              <main className="relative">{children}</main>
+
+              {/* Main content area */}
+              <div className="flex-1 flex flex-col min-h-screen lg:pl-64 pt-16 lg:pt-0">
+                <main className="flex-1 relative z-0">{children}</main>
+                {/* <Footer /> */}
+              </div>
+
               <PostHogPageview />
               <Toaster position="bottom-right" />
-              <Footer />
             </div>
           </GoogleOAuthProvider>
         </PHProvider>

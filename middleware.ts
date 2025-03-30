@@ -1,49 +1,43 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Define paths that should redirect to /my-trips when logged in
+const PUBLIC_PATHS = ["/"];
+
+// Define paths that require authentication
+const PROTECTED_PATHS = ["/my-trips", "/create-trip", "/pricing"];
+
 export function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname;
+  const userCookie = request.cookies.get("user");
+  const isLoggedIn = !!userCookie;
+  const pathname = request.nextUrl.pathname;
 
-  // Check for user authentication only on protected routes
-  if (path.startsWith("/my-trips")) {
-    // Parse and validate user cookie
-    const user = (() => {
-      try {
-        const userCookie = request.cookies.get("user");
-        if (!userCookie?.value) return null;
-        return JSON.parse(decodeURIComponent(userCookie.value));
-      } catch (e) {
-        console.error("Error parsing user cookie:", e);
-        return null;
-      }
-    })();
+  // If user is logged in and tries to access public paths like home page
+  if (isLoggedIn && PUBLIC_PATHS.includes(pathname)) {
+    return NextResponse.redirect(new URL("/my-trips", request.url));
+  }
 
-    if (!user) {
-      // If not authenticated and trying to access my-trips, redirect to home
-      const baseUrl = request.nextUrl.origin;
-      const response = NextResponse.redirect(`${baseUrl}/`);
-
-      // Add cache control headers to prevent caching of the redirect
-      response.headers.set(
-        "Cache-Control",
-        "no-store, no-cache, must-revalidate"
-      );
-      response.headers.set("Pragma", "no-cache");
-      response.headers.set("Expires", "0");
-
-      return response;
-    }
-
-    // Add auth headers for RSC requests
-    const response = NextResponse.next();
-    response.headers.set("x-middleware-cache", "no-cache");
-    return response;
+  // If user is not logged in and tries to access protected paths
+  if (
+    !isLoggedIn &&
+    PROTECTED_PATHS.some((path) => pathname.startsWith(path))
+  ) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
 }
 
-// Configure which routes to run middleware on
+// Configure paths that trigger the middleware
 export const config = {
-  matcher: ["/my-trips/:path*"],
+  matcher: [
+    /*
+     * Match all paths except:
+     * 1. /api routes
+     * 2. /_next (Next.js internals)
+     * 3. /static (inside /public)
+     * 4. all files inside /public (e.g. /favicon.ico)
+     */
+    "/((?!api|_next|static|[\\w-]+\\.\\w+).*)",
+  ],
 };

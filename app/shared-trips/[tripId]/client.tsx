@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import InfoSection from "@/components/trip/InfoSection";
 import Hotels from "@/components/trip/Hotels";
 import PlacesToVisit from "@/components/trip/PlacesToVisit";
+
 interface TripData {
   id: string;
   userEmail: string;
@@ -85,7 +86,7 @@ export default function SharedTripPageClient({ params }: SharedTripPageProps) {
     return (
       <div className="min-h-screen bg-background">
         <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-muted-foreground">Loading trip details...</p>
         </div>
       </div>
@@ -97,7 +98,7 @@ export default function SharedTripPageClient({ params }: SharedTripPageProps) {
     return (
       <div className="min-h-screen bg-background">
         <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-          <p className="text-lg text-red-500">
+          <p className="text-lg text-destructive">
             {error || "Something went wrong"}
           </p>
           <p className="text-muted-foreground">
@@ -112,7 +113,7 @@ export default function SharedTripPageClient({ params }: SharedTripPageProps) {
   return (
     <div className="min-h-screen bg-background">
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-indigo-500/5 to-background -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background -z-10" />
         <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
 
         <div className="container mx-auto px-4 py-8 md:py-12 lg:py-16">

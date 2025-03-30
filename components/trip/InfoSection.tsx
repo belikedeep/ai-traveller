@@ -4,7 +4,7 @@ import { GetPlaceDetails, GetPlacePhoto } from "@/service/GlobalAPI";
 import Image from "next/image";
 import { useEffect, useState, useCallback, memo } from "react";
 import { MapPin, Calendar, Wallet2, Users } from "lucide-react";
-import ShareTripDialog from "./ShareTripDialog";
+// import ShareTripDialog from "./ShareTripDialog";
 
 interface TripProps {
   trip: {
@@ -71,29 +71,29 @@ function InfoSection({ trip }: TripProps) {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-lg text-muted-foreground">
-              <MapPin className="h-5 w-5 text-indigo-500" />
+              <MapPin className="h-5 w-5 text-primary" />
               <span>{trip?.userSelection.location.label}</span>
             </div>
             <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-sm">
-                <Calendar className="h-4 w-4 text-indigo-500" />
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm">
+                <Calendar className="h-4 w-4 text-primary" />
                 <span>{trip?.userSelection.noOfDays} Days</span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-sm">
-                <Wallet2 className="h-4 w-4 text-indigo-500" />
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm">
+                <Wallet2 className="h-4 w-4 text-primary" />
                 <span>{trip?.userSelection.budget} Budget</span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-sm">
-                <Users className="h-4 w-4 text-indigo-500" />
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm">
+                <Users className="h-4 w-4 text-primary" />
                 <span>{trip?.userSelection.travellingWith} Travelers</span>
               </div>
             </div>
           </div>
 
-          <ShareTripDialog
+          {/* <ShareTripDialog
             tripId={trip.id || Date.now().toString()}
             location={trip.userSelection.location.label}
-          />
+          /> */}
         </div>
       </div>
     </div>

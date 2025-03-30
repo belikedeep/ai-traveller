@@ -66,12 +66,10 @@ function Hotels({ trip }: TripProps) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-8">
-        <h2 className="text-2xl font-semibold bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+        <h2 className="text-2xl font-semibold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
           Recommended Hotels
         </h2>
-        {loading && (
-          <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
-        )}
+        {loading && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -87,9 +85,9 @@ function Hotels({ trip }: TripProps) {
               target="_blank"
               className="block group"
             >
-              <div className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-indigo-500/10">
+              <div className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/10">
                 <div className="relative aspect-[4/3]">
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent z-10" />
+                  <div className="absolute inset-0 z-10" />
                   {loading ? (
                     <div className="absolute inset-0 bg-background animate-pulse" />
                   ) : (
@@ -107,7 +105,7 @@ function Hotels({ trip }: TripProps) {
                 </div>
 
                 <div className="p-4 space-y-2">
-                  <h3 className="font-semibold line-clamp-1 group-hover:text-indigo-400 transition-colors">
+                  <h3 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
                     {hotel.hotelName}
                   </h3>
                   <div className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -115,7 +113,7 @@ function Hotels({ trip }: TripProps) {
                     <span className="line-clamp-2">{hotel.hotelAddress}</span>
                   </div>
                   <div className="pt-2">
-                    <span className="text-lg font-semibold text-indigo-500">
+                    <span className="text-lg font-semibold text-primary">
                       {hotel.price}
                     </span>
                     <span className="text-sm text-muted-foreground">

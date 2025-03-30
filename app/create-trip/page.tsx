@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -81,16 +82,10 @@ export default function CreateTripPage() {
         localStorage.getItem("user") || "{}"
       ) as UserProfile;
 
-      // Add debug logging
-      console.log("Current user data:", user);
-      console.log("User plan:", user?.plan);
-
-      // Ensure plan is uppercase for comparison
       const userPlan = (user?.plan?.toUpperCase() ||
         "FREE") as keyof typeof PLAN_LIMITS;
       const planLimit = PLAN_LIMITS[userPlan];
 
-      console.log("Plan limit for", userPlan, "is", planLimit);
       if (Number(value) > planLimit) {
         toast.error(
           `Your ${userPlan} plan only allows trips up to ${planLimit} days. Upgrade for longer trips!`
@@ -104,7 +99,6 @@ export default function CreateTripPage() {
     });
   };
 
-  // Sync with Firestore on mount
   useEffect(() => {
     const syncUserData = async () => {
       const user = localStorage.getItem("user");
@@ -112,24 +106,18 @@ export default function CreateTripPage() {
         const userData = JSON.parse(user) as UserProfile;
         const firestoreUser = await getUser(userData.email);
         if (firestoreUser) {
-          // Update local storage with latest Firestore data
           const updatedUserData = {
             ...userData,
             credits: firestoreUser.credits,
-            plan: firestoreUser.plan.toUpperCase(), // Ensure plan is uppercase
+            plan: firestoreUser.plan.toUpperCase(),
           };
           localStorage.setItem("user", JSON.stringify(updatedUserData));
-          console.log("Synced user data:", updatedUserData);
         }
       }
     };
 
     syncUserData();
   }, []);
-
-  useEffect(() => {
-    console.log(formData);
-  }, [formData]);
 
   const login = useGoogleLogin({
     onSuccess: (response) => GetUserProfile(response as TokenInfo),
@@ -151,7 +139,6 @@ export default function CreateTripPage() {
 
       const userData = JSON.parse(user) as UserProfile;
 
-      // Check if user has enough credits
       const firestoreUser = await getUser(userData.email);
       if (
         !firestoreUser ||
@@ -190,7 +177,6 @@ export default function CreateTripPage() {
         const tripData = result.response.text();
         await SaveAiTrip(tripData);
 
-        // Deduct credits and update local storage
         const updatedUser = await updateUserCredits(
           userData.email,
           firestoreUser.credits - CREDIT_COSTS.TRIP_CREATION
@@ -200,11 +186,10 @@ export default function CreateTripPage() {
           const updatedLocalUser = {
             ...userData,
             credits: updatedUser.credits,
-            plan: updatedUser.plan, // Preserve the plan when updating credits
+            plan: updatedUser.plan,
           };
           localStorage.setItem("user", JSON.stringify(updatedLocalUser));
 
-          // Create a custom event to notify about credit update
           const creditUpdateEvent = new Event("creditUpdate");
           window.dispatchEvent(creditUpdateEvent);
         }
@@ -239,11 +224,9 @@ export default function CreateTripPage() {
         },
       })
       .then(async (res) => {
-        // Get or create user in Firestore
         let firestoreUser = await getUser(res.data.email);
 
         if (!firestoreUser) {
-          // Initialize new user in Firestore
           firestoreUser = await initializeUser({
             name: res.data.name,
             email: res.data.email,
@@ -251,7 +234,6 @@ export default function CreateTripPage() {
           });
         }
 
-        // Combine Google profile with Firestore data
         const userData = {
           ...res.data,
           credits: firestoreUser?.credits || 0,
@@ -259,7 +241,6 @@ export default function CreateTripPage() {
         };
 
         localStorage.setItem("user", JSON.stringify(userData));
-        console.log("User Profile:", userData);
         setOpenDialog(false);
         OnGenerateTrip();
       })
@@ -298,7 +279,7 @@ export default function CreateTripPage() {
     return (
       <div className="w-full bg-background/50 rounded-full h-2.5 mb-10">
         <div
-          className="bg-gradient-to-r from-indigo-600 to-indigo-400 h-2.5 rounded-full transition-all duration-500 ease-in-out"
+          className="bg-gradient-to-r from-primary to-primary/80 h-2.5 rounded-full transition-all duration-500 ease-in-out"
           style={{ width: `${(currentStep / totalSteps) * 100}%` }}
         ></div>
       </div>
@@ -352,10 +333,10 @@ export default function CreateTripPage() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] py-10 px-4 md:px-0 flex flex-col">
-      <div className="max-w-4xl mx-auto flex-1 flex flex-col gap-8">
-        <div className="rounded-2xl border border-border/50 backdrop-blur-sm bg-background/50 p-8 shadow-xl">
+      <div className="container mx-auto flex-1 flex flex-col lg:flex-row gap-8">
+        <div className="w-full lg:w-2/3 h-full rounded-2xl border border-border/50 backdrop-blur-sm bg-background/50 p-8 shadow-xl">
           <div className="mb-8">
-            <h2 className="font-bold text-4xl bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
+            <h2 className="font-bold text-4xl bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
               Plan Your Dream Journey
             </h2>
             <p className="mt-3 text-lg text-muted-foreground">
@@ -367,7 +348,7 @@ export default function CreateTripPage() {
           {currentStep === 1 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-2">
-                <MdLocationOn className="text-2xl text-indigo-500" />
+                <MdLocationOn className="text-2xl text-primary" />
                 <h2 className="text-xl font-medium">
                   Where do you want to go?
                 </h2>
@@ -401,7 +382,7 @@ export default function CreateTripPage() {
           {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-2">
-                <MdCalendarMonth className="text-2xl text-indigo-500" />
+                <MdCalendarMonth className="text-2xl text-primary" />
                 <h2 className="text-xl font-medium">
                   How many days will you stay?
                 </h2>
@@ -411,18 +392,12 @@ export default function CreateTripPage() {
                   const user = JSON.parse(
                     localStorage.getItem("user") || "{}"
                   ) as UserProfile;
-                  console.log("Days Input - Current user:", user);
                   const userPlan = (user?.plan?.toUpperCase() ||
                     "FREE") as keyof typeof PLAN_LIMITS;
-                  console.log(
-                    "Days Input - User plan (after uppercase):",
-                    userPlan
-                  );
                   const planLimit = PLAN_LIMITS[userPlan];
-                  console.log("Days Input - Plan limit:", planLimit);
                   return (
                     <Input
-                      placeholder={`Number of days (max 15 days)`}
+                      placeholder={`Number of days (max ${planLimit} days)`}
                       type="number"
                       min="1"
                       max={planLimit}
@@ -446,7 +421,7 @@ export default function CreateTripPage() {
           {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-2">
-                <FaMoneyBillWave className="text-2xl text-indigo-500" />
+                <FaMoneyBillWave className="text-2xl text-primary" />
                 <h2 className="text-xl font-medium">
                   What&apos;s your budget?
                 </h2>
@@ -458,11 +433,11 @@ export default function CreateTripPage() {
                     onClick={() => handleInputChange("budget", item.title)}
                     className={`p-5 border rounded-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] ${
                       formData?.budget === item.title
-                        ? "bg-gradient-to-b from-indigo-500/10 via-background to-background border-indigo-500 shadow-lg shadow-indigo-500/20"
+                        ? "bg-gradient-to-b from-primary/10 via-background to-background border-primary shadow-lg shadow-primary/20"
                         : "border-border/50 bg-background/50 hover:border-border"
                     }`}
                   >
-                    <div className="text-4xl mb-3 text-indigo-500">
+                    <div className="text-4xl mb-3 text-primary">
                       {item.icon}
                     </div>
                     <h2 className="font-bold text-lg">{item.title}</h2>
@@ -478,7 +453,7 @@ export default function CreateTripPage() {
           {currentStep === 4 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-2">
-                <FaUsers className="text-2xl text-indigo-500" />
+                <FaUsers className="text-2xl text-primary" />
                 <h2 className="text-xl font-medium">
                   Who are you traveling with?
                 </h2>
@@ -492,11 +467,11 @@ export default function CreateTripPage() {
                     }
                     className={`p-5 border rounded-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] ${
                       formData?.travellingWith === item.people
-                        ? "bg-gradient-to-b from-indigo-500/10 via-background to-background border-indigo-500 shadow-lg shadow-indigo-500/20"
+                        ? "bg-gradient-to-b from-primary/10 via-background to-background border-primary shadow-lg shadow-primary/20"
                         : "border-border/50 bg-background/50 hover:border-border"
                     }`}
                   >
-                    <div className="text-4xl mb-3 text-indigo-500">
+                    <div className="text-4xl mb-3 text-primary">
                       {item.icon}
                     </div>
                     <h2 className="font-bold text-lg">{item.title}</h2>
@@ -519,15 +494,17 @@ export default function CreateTripPage() {
             )}
 
             {currentStep < totalSteps ? (
-              <Button variant="default" onClick={nextStep}>
+              <Button
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                onClick={nextStep}
+              >
                 Continue
               </Button>
             ) : (
               <Button
                 disabled={loading}
-                variant="premium"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2"
                 onClick={OnGenerateTrip}
-                className="flex items-center gap-2"
               >
                 {loading ? (
                   <>
@@ -546,55 +523,57 @@ export default function CreateTripPage() {
         </div>
 
         {/* Summary card that shows selected options */}
-        {Object.keys(formData).length > 0 && (
-          <div className="mt-8 rounded-2xl border border-border/50 backdrop-blur-sm bg-background/50 p-6 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h3 className="text-xl font-medium mb-4">Your Trip Summary</h3>
-            <div className="space-y-3">
-              {formData.location && (
-                <div className="flex items-center gap-3">
-                  <MdLocationOn className="text-indigo-500" />
-                  <span className="text-muted-foreground">
-                    Destination:{" "}
-                    <span className="text-foreground">
-                      {formData.location.label}
-                    </span>
+        <div
+          className={`w-full lg:w-1/3 h-fit rounded-2xl border border-border/50 backdrop-blur-sm bg-background/50 p-6 shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500 sticky top-24 ${
+            Object.keys(formData).length === 0 ? "hidden" : ""
+          }`}
+        >
+          <h3 className="text-xl font-medium mb-4">Your Trip Summary</h3>
+          <div className="space-y-3">
+            {formData.location && (
+              <div className="flex items-center gap-3">
+                <MdLocationOn className="text-primary" />
+                <span className="text-muted-foreground">
+                  Destination:{" "}
+                  <span className="text-foreground">
+                    {formData.location.label}
                   </span>
-                </div>
-              )}
-              {formData.noOfDays && (
-                <div className="flex items-center gap-3">
-                  <MdCalendarMonth className="text-indigo-500" />
-                  <span className="text-muted-foreground">
-                    Duration:{" "}
-                    <span className="text-foreground">
-                      {formData.noOfDays} day{formData.noOfDays > 1 ? "s" : ""}
-                    </span>
+                </span>
+              </div>
+            )}
+            {formData.noOfDays && (
+              <div className="flex items-center gap-3">
+                <MdCalendarMonth className="text-primary" />
+                <span className="text-muted-foreground">
+                  Duration:{" "}
+                  <span className="text-foreground">
+                    {formData.noOfDays} day{formData.noOfDays > 1 ? "s" : ""}
                   </span>
-                </div>
-              )}
-              {formData.budget && (
-                <div className="flex items-center gap-3">
-                  <FaMoneyBillWave className="text-indigo-500" />
-                  <span className="text-muted-foreground">
-                    Budget:{" "}
-                    <span className="text-foreground">{formData.budget}</span>
+                </span>
+              </div>
+            )}
+            {formData.budget && (
+              <div className="flex items-center gap-3">
+                <FaMoneyBillWave className="text-primary" />
+                <span className="text-muted-foreground">
+                  Budget:{" "}
+                  <span className="text-foreground">{formData.budget}</span>
+                </span>
+              </div>
+            )}
+            {formData.travellingWith && (
+              <div className="flex items-center gap-3">
+                <FaUsers className="text-primary" />
+                <span className="text-muted-foreground">
+                  Traveling with:{" "}
+                  <span className="text-foreground">
+                    {formData.travellingWith}
                   </span>
-                </div>
-              )}
-              {formData.travellingWith && (
-                <div className="flex items-center gap-3">
-                  <FaUsers className="text-indigo-500" />
-                  <span className="text-muted-foreground">
-                    Traveling with:{" "}
-                    <span className="text-foreground">
-                      {formData.travellingWith}
-                    </span>
-                  </span>
-                </div>
-              )}
-            </div>
+                </span>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       <CustomDialog

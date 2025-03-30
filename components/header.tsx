@@ -2,19 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import CustomDialog from "@/components/ui/CustomDialog";
 import { FcGoogle } from "react-icons/fc";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Home, Plus, CreditCard, Map, LogOut } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { initializeUser, getUser } from "@/service/UserService";
 import {
   syncUserAuth,
@@ -32,18 +27,19 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSharedPage, setIsSharedPage] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
+  // Redirect logged-in users from home page
   useEffect(() => {
-    // Check if we're on a shared trip page
-    setIsSharedPage(window.location.pathname.startsWith("/shared-trips/"));
-  }, []);
+    if (user && pathname === "/") {
+      router.replace("/my-trips");
+    }
+  }, [user, pathname, router]);
 
   const checkUserAndCredits = async () => {
     const userData = syncUserAuth();
     if (userData) {
-      // Get latest credits from Firestore
       const firestoreUser = await getUser(userData.email);
       if (firestoreUser) {
         const updatedUser = {
@@ -54,6 +50,11 @@ export default function Header() {
         setUserStorage(updatedUser);
         setUserCookie(updatedUser);
         setUser(updatedUser);
+
+        // Redirect to /my-trips if on home page
+        if (window.location.pathname === "/") {
+          router.replace("/my-trips");
+        }
       } else {
         setUser(userData);
       }
@@ -62,11 +63,8 @@ export default function Header() {
 
   useEffect(() => {
     checkUserAndCredits();
-
-    // Set up periodic credit check
     const creditCheckInterval = setInterval(checkUserAndCredits, 10000);
 
-    // Listen for storage changes and credit updates
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "user") {
         checkUserAndCredits();
@@ -87,13 +85,11 @@ export default function Header() {
     };
   }, []);
 
-  // Close mobile menu when clicking outside or navigating
   useEffect(() => {
     const handleRouteChange = () => {
       setIsMobileMenuOpen(false);
     };
 
-    // Handle document body overflow for mobile menu
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -139,14 +135,15 @@ export default function Header() {
         plan: firestoreUser.plan,
       };
 
-      // Store user data in both localStorage and cookie
       setUserStorage(userWithCredits);
       setUserCookie(userWithCredits);
       setUser(userWithCredits);
       setOpenDialog(false);
       setIsMobileMenuOpen(false);
 
-      // Dispatch auth change event
+      // Redirect to /my-trips after successful login
+      router.replace("/my-trips");
+
       window.dispatchEvent(new Event("auth-change"));
     } catch (err) {
       console.error("Error fetching user profile:", err);
@@ -160,205 +157,235 @@ export default function Header() {
     setIsMobileMenuOpen(false);
   };
 
+  // Navigation items - Note: Home now points to /my-trips for logged-in users
+  const navItems = user
+    ? [
+        // { href: "/my-trips", label: "Home", icon: Home },
+        { href: "/create-trip", label: "Create Trip", icon: Plus },
+        { href: "/my-trips", label: "My Trips", icon: Map },
+        { href: "/pricing", label: "Credits", icon: CreditCard },
+      ]
+    : [];
+
   return (
-    <header className="bg-background/80 backdrop-blur-md border-b border-border/40 sticky top-0 z-50 gap-0 h-16">
-      <div className="max-w-7xl mx-auto h-full flex justify-between items-center px-4 sm:px-6">
-        {/* Logo */}
-        <Link
-          href={isSharedPage ? "/" : user ? "/my-trips" : "/"}
-          className="flex items-center group"
-        >
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            width={40}
-            height={40}
-            className="cursor-pointer transition-transform duration-200 group-hover:scale-110"
-          />
-          <span className="text-foreground font-bold text-lg">Trip Genie</span>
-        </Link>
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-64 flex-col border-r border-border/40 bg-background/80 backdrop-blur-md z-30">
+        <div className="p-6">
+          <Link
+            href={user ? "/my-trips" : "/"}
+            className="flex items-center gap-2"
+          >
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={40}
+              height={40}
+              className="transition-transform duration-200 hover:scale-110"
+            />
+            <span className="text-foreground font-bold text-lg">
+              Trip Genie
+            </span>
+          </Link>
+        </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="lg:hidden p-2 -mr-2 hover:bg-accent/80 rounded-full transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"
-          aria-label="Toggle menu"
-        >
-          {isMobileMenuOpen ? (
-            <X className="h-5 w-5 text-foreground" />
+        <nav className="flex-1 p-4">
+          {user ? (
+            <div className="space-y-6">
+              <div className="px-2">
+                <div className="flex items-center gap-3 mb-2">
+                  <Image
+                    src={user.picture}
+                    width={40}
+                    height={40}
+                    className="rounded-full border-2 border-primary"
+                    alt={user.name}
+                  />
+                  <div>
+                    <p className="font-medium text-sm">{user.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start mt-4"
+                  asChild
+                >
+                  <Link href="/pricing">💰 {user.credits ?? 0} Credits</Link>
+                </Button>
+              </div>
+
+              <div className="space-y-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Button
+                      key={item.href}
+                      variant="ghost"
+                      className={`w-full justify-start gap-2 ${
+                        pathname === item.href
+                          ? "bg-primary/10 text-primary"
+                          : ""
+                      }`}
+                      asChild
+                    >
+                      <Link href={item.href}>
+                        <Icon className="h-4 w-4" />
+                        {item.label}
+                      </Link>
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
           ) : (
-            <Menu className="h-5 w-5 text-foreground" />
+            <Button
+              onClick={() => setOpenDialog(true)}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              🚀 Sign Up
+            </Button>
           )}
-        </button>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex lg:items-center lg:gap-6">
-          {!isSharedPage &&
-            (user ? (
-              <>
-                <Link href="/pricing">
-                  <Button
-                    variant="outline"
-                    className="text-foreground hover:bg-accent transition-colors duration-200"
-                  >
-                    💰 {user.credits ?? 0} Credits
-                  </Button>
-                </Link>
-                <Link href="/create-trip">
-                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-indigo-600/40">
-                    ✨ Create Trip
-                  </Button>
-                </Link>
-                <Link href="/my-trips">
-                  <Button
-                    variant="ghost"
-                    className="text-foreground hover:bg-accent transition-colors duration-200"
-                  >
-                    My Trips
-                  </Button>
-                </Link>
-                <Popover>
-                  <PopoverTrigger>
-                    <div className="relative group">
-                      <Image
-                        src={user.picture}
-                        width={40}
-                        height={40}
-                        className="rounded-full cursor-pointer border-2 border-border/40 transition-all duration-200 group-hover:border-indigo-600 group-hover:scale-105"
-                        alt={user.name}
-                      />
-                      <div className="absolute inset-0 rounded-full bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="bg-background/95 backdrop-blur-sm border-border/40 shadow-xl">
-                    <div className="p-3">
-                      <p className="font-medium text-foreground">{user.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {user.email}
-                      </p>
-                      <Button
-                        variant="ghost"
-                        className="w-full mt-3 hover:bg-accent text-foreground transition-colors duration-200"
-                        onClick={handleLogout}
-                      >
-                        Logout
-                      </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </>
-            ) : (
-              <Button
-                onClick={() => setOpenDialog(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-indigo-600/40"
-              >
-                🚀 Sign Up
-              </Button>
-            ))}
         </nav>
-      </div>
+
+        {user && (
+          <div className="p-4 border-t border-border/40">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
+        )}
+      </aside>
+
+      {/* Mobile Header */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-md border-b border-border/40 z-40">
+        <div className="h-full flex justify-between items-center px-4">
+          <Link
+            href={user ? "/my-trips" : "/"}
+            className="flex items-center gap-2"
+          >
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={36}
+              height={36}
+              className="transition-transform duration-200"
+            />
+            <span className="text-foreground font-bold text-lg">
+              Trip Genie
+            </span>
+          </Link>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={() => setIsMobileMenuOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
+      </header>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 bg-background/95 backdrop-blur-md z-50 flex -top-2 flex-col">
+        <div className="lg:hidden fixed inset-0 bg-background/95 backdrop-blur-md z-50 flex flex-col">
           <div className="flex justify-between items-center p-4 border-b border-border/40">
             <Link
               href={user ? "/my-trips" : "/"}
-              className="flex items-center group"
+              className="flex items-center gap-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <Image
-                src="/logo.png"
-                alt="Logo"
-                width={40}
-                height={40}
-                className="cursor-pointer transition-transform duration-200 group-hover:scale-110"
-              />
-              <span className=" text-foreground font-bold text-lg">
+              <Image src="/logo.png" alt="Logo" width={36} height={36} />
+              <span className="text-foreground font-bold text-lg">
                 Trip Genie
               </span>
             </Link>
 
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="p-2 hover:bg-accent/80 rounded-full transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"
-              aria-label="Close menu"
             >
-              <X className="h-6 w-6 text-foreground" />
-            </button>
+              <X className="h-6 w-6" />
+            </Button>
           </div>
 
-          <div className="flex-1 transition-all bg-black">
-            <div className="flex flex-col items-center gap-6 p-6 pt-12">
-              {!isSharedPage &&
-                (user ? (
-                  <>
-                    <div className="flex flex-col items-center mb-8">
-                      <div className="relative group">
-                        <Image
-                          src={user.picture}
-                          width={64}
-                          height={64}
-                          className="rounded-full border-2 border-indigo-600 shadow-lg transition-transform duration-200 group-hover:scale-105"
-                          alt={user.name}
-                        />
-                        <div className="absolute inset-0 rounded-full bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                      </div>
-                      <p className="mt-4 font-medium text-lg text-foreground">
-                        {user.name}
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {user.email}
-                      </p>
-                    </div>
-
-                    <Link href="/pricing" className="w-full">
-                      <Button
-                        variant="outline"
-                        className="w-full text-foreground hover:bg-accent/80 transition-all duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        💰 {user.credits ?? 0} Credits
-                      </Button>
-                    </Link>
-
-                    <Link href="/create-trip" className="w-full">
-                      <Button
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/40 transition-all duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        ✨ Create Trip
-                      </Button>
-                    </Link>
-
-                    <Link href="/my-trips" className="w-full">
-                      <Button
-                        variant="ghost"
-                        className="w-full text-foreground hover:bg-accent/80 transition-all duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        My Trips
-                      </Button>
-                    </Link>
-
-                    <Button
-                      variant="ghost"
-                      className="w-full mt-6 hover:bg-accent/80 text-foreground transition-all duration-200"
-                      onClick={handleLogout}
-                    >
-                      Logout
-                    </Button>
-                  </>
-                ) : (
+          <div className="flex-1 overflow-y-auto p-4">
+            {user ? (
+              <div className="space-y-6">
+                <div className="flex flex-col items-center text-center">
+                  <Image
+                    src={user.picture}
+                    width={64}
+                    height={64}
+                    className="rounded-full border-2 border-primary"
+                    alt={user.name}
+                  />
+                  <p className="mt-2 font-medium">{user.name}</p>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
                   <Button
-                    onClick={() => setOpenDialog(true)}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all duration-200"
+                    variant="outline"
+                    className="w-full justify-center mt-4"
+                    asChild
                   >
-                    🚀 Sign Up
+                    <Link href="/pricing">💰 {user.credits ?? 0} Credits</Link>
                   </Button>
-                ))}
-            </div>
+                </div>
+
+                <div className="space-y-2">
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Button
+                        key={item.href}
+                        variant="ghost"
+                        className={`w-full justify-start gap-2 ${
+                          pathname === item.href
+                            ? "bg-primary/10 text-primary"
+                            : ""
+                        }`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        asChild
+                      >
+                        <Link href={item.href}>
+                          <Icon className="h-4 w-4" />
+                          {item.label}
+                        </Link>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <Button
+                onClick={() => setOpenDialog(true)}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                🚀 Sign Up
+              </Button>
+            )}
           </div>
+
+          {user && (
+            <div className="p-4 border-t border-border/40">
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
@@ -370,12 +397,12 @@ export default function Header() {
       >
         <Button
           onClick={() => login()}
-          className="w-full mt-5 flex gap-4 items-center bg-background hover:bg-accent text-foreground transition-colors duration-200"
+          className="w-full mt-5 flex gap-4 items-center bg-background hover:bg-accent text-foreground"
         >
           <FcGoogle className="h-5 w-5" />
           Sign in with Google
         </Button>
       </CustomDialog>
-    </header>
+    </>
   );
 }

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const Footer = () => {
   return (
-    <footer className="bg-background/50 border-t border-border/40">
+    <footer className="bg-background/50 border-t border-border/40 lg:pl-64">
       <div className="container mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-4">
@@ -31,7 +31,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="#features"
-                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="transition-transform duration-200 group-hover:translate-x-1">
                     Features ✨
@@ -41,7 +41,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="#pricing"
-                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="transition-transform duration-200 group-hover:translate-x-1">
                     Pricing 💰
@@ -51,7 +51,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/api-docs"
-                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="transition-transform duration-200 group-hover:translate-x-1">
                     API 💻
@@ -67,7 +67,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/about"
-                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="transition-transform duration-200 group-hover:translate-x-1">
                     About Us 🧑‍💼
@@ -77,7 +77,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/blog"
-                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="transition-transform duration-200 group-hover:translate-x-1">
                     Blog 📰
@@ -87,7 +87,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/careers"
-                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="transition-transform duration-200 group-hover:translate-x-1">
                     Careers 💼
@@ -103,7 +103,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/help"
-                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="transition-transform duration-200 group-hover:translate-x-1">
                     Help Center 🙋‍♀️
@@ -113,7 +113,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/contact"
-                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="transition-transform duration-200 group-hover:translate-x-1">
                     Contact Us 📞
@@ -123,7 +123,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/privacy"
-                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="transition-transform duration-200 group-hover:translate-x-1">
                     Privacy Policy 🔒
@@ -133,7 +133,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/terms"
-                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="transition-transform duration-200 group-hover:translate-x-1">
                     Terms and Conditions 📜
@@ -143,7 +143,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/cancellation"
-                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="transition-transform duration-200 group-hover:translate-x-1">
                     Cancellation and Refund 💸
@@ -153,7 +153,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/shipping"
-                  className="text-muted-foreground hover:text-indigo-600 transition-colors duration-200 flex items-center gap-2 group"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="transition-transform duration-200 group-hover:translate-x-1">
                     Shipping and Delivery 🚚
