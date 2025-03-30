@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   SelectBudgetOptions,
   SelectedTravelsList,
@@ -23,6 +22,13 @@ import axios from "axios";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/service/FirebaseConfig";
 import { useRouter } from "next/navigation";
+import { Calendar } from "@/components/ui/calendar";
+import { addDays, format, differenceInDays } from "date-fns";
+import {
+  PopoverTrigger,
+  PopoverContent,
+  Popover,
+} from "@/components/ui/popover";
 import {
   updateUserCredits,
   getUser,
@@ -46,6 +52,8 @@ interface GooglePlaceData {
 
 interface FormData {
   location?: GooglePlaceData;
+  startDate?: Date;
+  endDate?: Date;
   noOfDays?: number;
   budget?: string;
   travellingWith?: string;
@@ -69,30 +77,60 @@ export default function CreateTripPage() {
   const [formData, setFormData] = useState<FormData>({});
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const totalSteps = 4;
 
   const router = useRouter();
 
-  const handleInputChange = (
-    name: string,
-    value: string | number | GooglePlaceData
-  ) => {
-    if (name === "noOfDays") {
+  const handleDateChange = (date: Date | undefined) => {
+    if (!date) return;
+
+    if (!formData.startDate) {
+      setFormData({
+        ...formData,
+        startDate: date,
+      });
+    } else if (!formData.endDate && date >= formData.startDate) {
+      const daysDiff = differenceInDays(date, formData.startDate) + 1;
+
+      if (daysDiff > 15) {
+        toast.error("Maximum trip duration is 15 days");
+        return;
+      }
+
       const user = JSON.parse(
         localStorage.getItem("user") || "{}"
       ) as UserProfile;
-
       const userPlan = (user?.plan?.toUpperCase() ||
         "FREE") as keyof typeof PLAN_LIMITS;
       const planLimit = PLAN_LIMITS[userPlan];
 
-      if (Number(value) > planLimit) {
+      if (daysDiff > planLimit) {
         toast.error(
           `Your ${userPlan} plan only allows trips up to ${planLimit} days. Upgrade for longer trips!`
         );
         return;
       }
+
+      setFormData({
+        ...formData,
+        endDate: date,
+        noOfDays: daysDiff,
+      });
+      setDatePopoverOpen(false);
+    } else {
+      setFormData({
+        ...formData,
+        startDate: date,
+        endDate: undefined,
+      });
     }
+  };
+
+  const handleInputChange = (
+    name: string,
+    value: string | number | GooglePlaceData
+  ) => {
     setFormData({
       ...formData,
       [name]: value,
@@ -153,7 +191,8 @@ export default function CreateTripPage() {
 
       if (
         !formData?.location ||
-        !formData?.noOfDays ||
+        !formData?.startDate ||
+        !formData?.endDate ||
         !formData?.budget ||
         !formData?.travellingWith
       ) {
@@ -167,6 +206,7 @@ export default function CreateTripPage() {
         "{location}",
         formData?.location?.label || ""
       )
+        .replace("{startDate}", format(formData.startDate!, "MMMM d, yyyy"))
         .replace("{totalDays}", formData?.noOfDays?.toString() || "")
         .replace("{traveler}", formData?.travellingWith || "")
         .replace("{budget}", formData?.budget || "");
@@ -205,7 +245,11 @@ export default function CreateTripPage() {
 
     const docId = Date.now().toString();
     await setDoc(doc(db, "AITrips", docId), {
-      userSelection: formData,
+      userSelection: {
+        ...formData,
+        startDate: formData.startDate?.toISOString(),
+        endDate: formData.endDate?.toISOString(),
+      },
       tripData: JSON.parse(TripData),
       userEmail: user?.email,
       id: docId,
@@ -255,8 +299,8 @@ export default function CreateTripPage() {
       toast.error("Please select a destination");
       return;
     }
-    if (currentStep === 2 && !formData.noOfDays) {
-      toast.error("Please enter number of days");
+    if (currentStep === 2 && (!formData.startDate || !formData.endDate)) {
+      toast.error("Please select your travel dates");
       return;
     }
     if (currentStep === 3 && !formData.budget) {
@@ -383,36 +427,67 @@ export default function CreateTripPage() {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center gap-3 mb-2">
                 <MdCalendarMonth className="text-2xl text-primary" />
-                <h2 className="text-xl font-medium">
-                  How many days will you stay?
-                </h2>
+                <h2 className="text-xl font-medium">When will you travel?</h2>
               </div>
-              <div>
-                {(() => {
-                  const user = JSON.parse(
-                    localStorage.getItem("user") || "{}"
-                  ) as UserProfile;
-                  const userPlan = (user?.plan?.toUpperCase() ||
-                    "FREE") as keyof typeof PLAN_LIMITS;
-                  const planLimit = PLAN_LIMITS[userPlan];
-                  return (
-                    <Input
-                      placeholder={`Number of days (max ${planLimit} days)`}
-                      type="number"
-                      min="1"
-                      max={planLimit}
-                      value={formData.noOfDays || ""}
-                      onChange={(e) =>
-                        handleInputChange("noOfDays", parseInt(e.target.value))
-                      }
-                      className="text-lg"
+              <div className="flex flex-col space-y-4">
+                <Popover
+                  open={datePopoverOpen}
+                  onOpenChange={setDatePopoverOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={`w-full justify-start text-left font-normal ${
+                        !formData.startDate && "text-muted-foreground"
+                      }`}
+                    >
+                      <MdCalendarMonth className="mr-2 h-4 w-4" />
+                      {formData.startDate ? (
+                        formData.endDate ? (
+                          <>
+                            {format(formData.startDate, "MMM d, yyyy")} -{" "}
+                            {format(formData.endDate, "MMM d, yyyy")} (
+                            {formData.noOfDays}{" "}
+                            {formData.noOfDays === 1 ? "day" : "days"})
+                          </>
+                        ) : (
+                          "Select end date"
+                        )
+                      ) : (
+                        "Select dates"
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      initialFocus
+                      mode="single"
+                      defaultMonth={formData.startDate}
+                      selected={formData.endDate || formData.startDate}
+                      onSelect={handleDateChange}
+                      numberOfMonths={1}
+                      required={false}
+                      disabled={(date) => {
+                        if (!date) return true;
+                        if (date < new Date()) return true;
+                        if (formData.startDate && !formData.endDate) {
+                          if (date < formData.startDate) return true;
+                          if (date > addDays(formData.startDate, 14))
+                            return true;
+                        }
+                        return false;
+                      }}
                     />
-                  );
-                })()}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <p>
-                  We recommend 3-5 days to fully experience most destinations
+                  </PopoverContent>
+                </Popover>
+                <p className="text-sm text-muted-foreground">
+                  {!formData.startDate
+                    ? "Select your travel dates (maximum 15 days)"
+                    : !formData.endDate
+                    ? "Now select your end date"
+                    : `Trip duration: ${formData.noOfDays} ${
+                        formData.noOfDays === 1 ? "day" : "days"
+                      }`}
                 </p>
               </div>
             </div>
@@ -541,13 +616,16 @@ export default function CreateTripPage() {
                 </span>
               </div>
             )}
-            {formData.noOfDays && (
+            {formData.startDate && formData.endDate && (
               <div className="flex items-center gap-3">
                 <MdCalendarMonth className="text-primary" />
                 <span className="text-muted-foreground">
-                  Duration:{" "}
+                  Dates:{" "}
                   <span className="text-foreground">
-                    {formData.noOfDays} day{formData.noOfDays > 1 ? "s" : ""}
+                    {format(formData.startDate, "MMM d")} -{" "}
+                    {format(formData.endDate, "MMM d, yyyy")} (
+                    {formData.noOfDays}{" "}
+                    {formData.noOfDays === 1 ? "day" : "days"})
                   </span>
                 </span>
               </div>

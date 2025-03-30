@@ -12,6 +12,7 @@ import {
   ArrowUpRight,
   Loader2,
 } from "lucide-react";
+import { addDays, format } from "date-fns";
 
 interface Place {
   placeName: string;
@@ -35,6 +36,8 @@ interface TripProps {
       location: {
         label: string;
       };
+      startDate: string;
+      noOfDays: number;
     };
   };
 }
@@ -56,6 +59,31 @@ function PlacesToVisit({ trip }: TripProps) {
       return dayNumA - dayNumB;
     });
   }, [memoizedTrip]);
+
+  const getDateForDay = useCallback(
+    (dayNumber: number) => {
+      try {
+        if (!trip?.userSelection?.startDate) return null;
+        const startDate = new Date(trip.userSelection.startDate);
+        if (isNaN(startDate.getTime())) return null; // Check if date is valid
+        return addDays(startDate, dayNumber - 1);
+      } catch (error) {
+        console.error("Error calculating date:", error);
+        return null;
+      }
+    },
+    [trip?.userSelection?.startDate]
+  );
+
+  const formatDate = useCallback((date: Date | null) => {
+    try {
+      if (!date || isNaN(date.getTime())) return "";
+      return format(date, "MMMM d, yyyy");
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "";
+    }
+  }, []);
 
   const fetchPlacePhotos = useCallback(async () => {
     setLoading(true);
@@ -99,87 +127,97 @@ function PlacesToVisit({ trip }: TripProps) {
       </div>
 
       <div className="space-y-8">
-        {memoizedDays.map(([dayKey, dayData]: [string, DayData]) => (
-          <div
-            key={dayKey}
-            className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50"
-          >
-            <div className="p-6 border-b border-border/50 space-y-4">
-              <div className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-primary" />
-                <h3 className="text-xl font-semibold">{dayKey}</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                  <span>Theme: {dayData.theme}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-primary" />
-                  <span>Best Time: {dayData.best_time_to_visit}</span>
-                </div>
-              </div>
-            </div>
+        {memoizedDays.map(([dayKey, dayData]: [string, DayData]) => {
+          const dayNumber = parseInt(dayKey.replace("Day ", ""));
+          const date = getDateForDay(dayNumber);
+          const formattedDate = formatDate(date);
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-              {dayData.places.map((place: Place, index: number) => (
-                <div
-                  key={index}
-                  className="group-hover:transform group-hover:scale-[1.02] transition-transform duration-300"
-                >
-                  <Link
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                      place.placeName
-                    )}`}
-                    target="_blank"
-                    className="block group"
+          return (
+            <div
+              key={dayKey}
+              className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50"
+            >
+              <div className="p-6 border-b border-border/50 space-y-4">
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-5 w-5 text-primary" />
+                  <h3 className="text-xl font-semibold">
+                    {dayKey}
+                    {formattedDate ? ` - ${formattedDate}` : ""}
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                    <span>Theme: {dayData.theme}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-primary" />
+                    <span>Best Time: {dayData.best_time_to_visit}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                {dayData.places.map((place: Place, index: number) => (
+                  <div
+                    key={index}
+                    className="group-hover:transform group-hover:scale-[1.02] transition-transform duration-300"
                   >
-                    <div className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/10">
-                      <div className="relative aspect-video">
-                        <div className="absolute inset-0 z-10" />
-                        {loading ? (
-                          <div className="absolute inset-0 bg-background animate-pulse" />
-                        ) : (
-                          <Image
-                            src={
-                              placePhotos[place.placeName] || "/placeholder.jpg"
-                            }
-                            alt={place.placeName}
-                            fill
-                            className="object-cover transition-all duration-500 group-hover:scale-110"
-                          />
-                        )}
-                        <div className="absolute top-3 right-3 z-20">
-                          <div className="flex items-center gap-1 text-sm bg-background/90 px-2 py-1 rounded-full backdrop-blur-sm border border-border/50">
-                            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                            <span>{place.rating}</span>
+                    <Link
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        place.placeName
+                      )}`}
+                      target="_blank"
+                      className="block group"
+                    >
+                      <div className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/10">
+                        <div className="relative aspect-video">
+                          <div className="absolute inset-0 z-10" />
+                          {loading ? (
+                            <div className="absolute inset-0 bg-background animate-pulse" />
+                          ) : (
+                            <Image
+                              src={
+                                placePhotos[place.placeName] ||
+                                "/placeholder.jpg"
+                              }
+                              alt={place.placeName}
+                              fill
+                              className="object-cover transition-all duration-500 group-hover:scale-110"
+                            />
+                          )}
+                          <div className="absolute top-3 right-3 z-20">
+                            <div className="flex items-center gap-1 text-sm bg-background/90 px-2 py-1 rounded-full backdrop-blur-sm border border-border/50">
+                              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                              <span>{place.rating}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-4 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <h4 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
+                              {place.placeName}
+                            </h4>
+                            <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                          </div>
+                          <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                            <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
+                            <p className="line-clamp-2">{place.placeDetails}</p>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                            <Clock className="h-4 w-4" />
+                            <span>{place.travelTime}</span>
                           </div>
                         </div>
                       </div>
-
-                      <div className="p-4 space-y-2">
-                        <div className="flex items-center justify-between gap-2">
-                          <h4 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                            {place.placeName}
-                          </h4>
-                          <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                        </div>
-                        <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                          <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
-                          <p className="line-clamp-2">{place.placeDetails}</p>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
-                          <Clock className="h-4 w-4" />
-                          <span>{place.travelTime}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-              ))}
+                    </Link>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
