@@ -41,6 +41,7 @@ interface TripProps {
       noOfDays: number;
     };
   };
+  onPlaceSelect?: (place: string) => void;
 }
 
 const calculateEndDate = (startDate: string, noOfDays: number): Date => {
@@ -48,8 +49,7 @@ const calculateEndDate = (startDate: string, noOfDays: number): Date => {
   return addDays(start, noOfDays - 1);
 };
 
-function PlacesToVisit({ trip }: TripProps) {
-  console.log("PlacesToVisit Trip Props:", JSON.stringify(trip, null, 2));
+function PlacesToVisit({ trip, onPlaceSelect }: TripProps) {
   const [placePhotos, setPlacePhotos] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
@@ -133,11 +133,9 @@ function PlacesToVisit({ trip }: TripProps) {
             {loading && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
           </h2>
           <p className="text-sm leading-relaxed">
-            Welcome to Gangtok, the captivating capital city of Sikkim! Nestled in the Eastern Himalayas,
-            this vibrant destination offers a perfect blend of natural beauty, cultural heritage, and modern amenities.
-            Known for its monasteries, spectacular views of Mount Kanchenjunga, and rich Sikkimese culture,
-            Gangtok provides an enchanting escape. Your carefully crafted 6-day itinerary covers the city's
-            most remarkable attractions, from ancient Buddhist monasteries to scenic viewpoints and local cultural experiences.
+            Welcome to {trip.userSelection.location.label}! Explore this curated {trip.userSelection.noOfDays}-day
+            itinerary showcasing the finest attractions and experiences. Each destination is marked on the map -
+            simply click any location to zoom in and view more details.
           </p>
         </div>
         <div className="flex flex-wrap gap-4 text-sm">
@@ -197,12 +195,9 @@ function PlacesToVisit({ trip }: TripProps) {
                     key={index}
                     className="group-hover:transform group-hover:scale-[1.02] transition-transform duration-300"
                   >
-                    <Link
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                        place.placeName
-                      )}`}
-                      target="_blank"
-                      className="block group"
+                    <div
+                      onClick={() => onPlaceSelect?.(place.placeName)}
+                      className="block group cursor-pointer"
                     >
                       <div className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/10">
                         <div className="relative aspect-video">
@@ -245,8 +240,8 @@ function PlacesToVisit({ trip }: TripProps) {
                           </div>
                         </div>
                       </div>
-                    </Link>
-                  </div>
+                    </div>
+                   </div>
                 )})}
               </div>
             </div>

@@ -8,6 +8,7 @@ import InfoSection from "@/components/trip/InfoSection";
 import Hotels from "@/components/trip/Hotels";
 import PlacesToVisit from "@/components/trip/PlacesToVisit";
 import InfoTab from "@/components/trip/local-info/InfoTab";
+import TripMap from "@/components/trip/TripMap";
 import { Loader2 } from "lucide-react";
 
 interface TripData {
@@ -83,6 +84,7 @@ export default function ViewTripPage({
   const unwrappedParams = use(params);
   const [trip, setTrip] = useState<TripData | null>(null);
   const [isLoadingLocalInfo, setIsLoadingLocalInfo] = useState(true);
+  const [selectedPlace, setSelectedPlace] = useState<string | null>(null);
 
   const getTripData = useCallback(async () => {
     try {
@@ -131,18 +133,33 @@ export default function ViewTripPage({
   }
 
   return (
-    <div className="relative">
+    <div className="relative min-h-screen">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-indigo-500/5 to-background -z-10" />
       <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
 
-      <div className="container mx-auto px-4 py-8 md:py-12 lg:py-16">
-        <div className="space-y-12">
-          <InfoSection trip={trip} />
-          {/* <Hotels trip={trip} /> */}
-          <PlacesToVisit trip={trip} />
-          <InfoTab
-            localInfo={trip.tripData.localInfo || null}
-            isLoading={isLoadingLocalInfo}
+      <div className="flex h-[calc(100vh-4rem)]">
+        {/* Left side: Scrollable content */}
+        <div className="w-1/2 overflow-y-auto px-4 py-8">
+          <div className="space-y-12 max-w-3xl mx-auto">
+            <InfoSection trip={trip} />
+            <Hotels trip={trip} />
+            <PlacesToVisit
+              trip={trip}
+              onPlaceSelect={(place) => setSelectedPlace(place)}
+            />
+            <InfoTab
+              localInfo={trip.tripData.localInfo || null}
+              isLoading={isLoadingLocalInfo}
+            />
+          </div>
+        </div>
+
+        {/* Right side: Fixed map */}
+        <div className="w-1/2 fixed right-0 top-16 bottom-0">
+          <TripMap
+            center={trip.userSelection.location.label}
+            selectedPlace={selectedPlace}
+            places={Object.values(trip.tripData.itinerary).flatMap(day => day.places)}
           />
         </div>
       </div>

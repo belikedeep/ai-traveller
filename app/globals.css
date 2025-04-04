@@ -1,3 +1,5 @@
+@import 'mapbox-gl/dist/mapbox-gl.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -66,4 +68,41 @@ body {
 
 .rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
   background-color: hsl(var(--accent));
+}
+
+/* Mapbox custom styles */
+.mapboxgl-popup-content {
+  padding: 12px;
+  border-radius: 8px;
+  @apply bg-background;
+  @apply text-foreground;
+  @apply shadow-lg;
+  @apply border;
+  @apply border-border/50;
+}
+
+.mapboxgl-popup-close-button {
+  @apply text-muted-foreground;
+  @apply hover:text-foreground;
+  @apply transition-colors;
+}
+
+.mapboxgl-ctrl-top-right {
+  @apply top-4 right-4;
+}
+
+.mapboxgl-ctrl-group {
+  @apply bg-background/90;
+  @apply backdrop-blur-sm;
+  @apply border;
+  @apply border-border/50;
+  @apply shadow-lg;
+  @apply rounded-lg;
+  @apply overflow-hidden;
+}
+
+.mapboxgl-ctrl-group button {
+  @apply text-foreground;
+  @apply hover:bg-accent;
+  @apply transition-colors;
 }
