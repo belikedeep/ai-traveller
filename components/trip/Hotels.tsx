@@ -7,9 +7,9 @@ import Image from "next/image";
 import { Star, MapPin, Loader2 } from "lucide-react";
 
 interface HotelOption {
-  hotelName: string;
-  hotelAddress: string;
-  price: string;
+  HotelName: string;
+  HotelAddress: string;
+  Price: string;
   rating: number;
   description: string;
 }
@@ -37,7 +37,7 @@ function Hotels({ trip }: TripProps) {
       const photos: Record<string, string> = {};
       for (const hotel of trip.tripData.hotel_options) {
         const result = await GetHotelDetails(
-          hotel.hotelName,
+          hotel.HotelName,
           trip?.userSelection.location.label
         );
 
@@ -45,7 +45,7 @@ function Hotels({ trip }: TripProps) {
           const photoRef = result.data.results[0].photos[0].photo_reference;
           const url = GetPlacePhoto(photoRef);
           if (url) {
-            photos[hotel.hotelName] = url;
+            photos[hotel.HotelName] = url;
           }
         }
       }
@@ -80,7 +80,7 @@ function Hotels({ trip }: TripProps) {
           >
             <Link
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                hotel.hotelName
+                hotel.HotelName
               )}`}
               target="_blank"
               className="block group"
@@ -92,8 +92,8 @@ function Hotels({ trip }: TripProps) {
                     <div className="absolute inset-0 bg-background animate-pulse" />
                   ) : (
                     <Image
-                      src={hotelPhotos[hotel.hotelName] || "/placeholder.jpg"}
-                      alt={hotel.hotelName}
+                      src={hotelPhotos[hotel.HotelName] || "/placeholder.jpg"}
+                      alt={hotel.HotelName}
                       fill
                       className="object-cover transition-all duration-500 group-hover:scale-110"
                     />
@@ -106,15 +106,15 @@ function Hotels({ trip }: TripProps) {
 
                 <div className="p-4 space-y-2">
                   <h3 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                    {hotel.hotelName}
+                    {hotel.HotelName}
                   </h3>
                   <div className="flex items-start gap-2 text-sm text-muted-foreground">
                     <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
-                    <span className="line-clamp-2">{hotel.hotelAddress}</span>
+                    <span className="line-clamp-2">{hotel.HotelAddress}</span>
                   </div>
                   <div className="pt-2">
                     <span className="text-lg font-semibold text-primary">
-                      {hotel.price}
+                      {hotel.Price}
                     </span>
                     <span className="text-sm text-muted-foreground">
                       {" "}

@@ -3,9 +3,11 @@
 import { use, useEffect, useState, useCallback } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/service/FirebaseConfig";
+import { getLocalInfo, getDestinationDefaults, updateLocalInfo } from "@/service/LocalInfoService";
 import InfoSection from "@/components/trip/InfoSection";
 import Hotels from "@/components/trip/Hotels";
 import PlacesToVisit from "@/components/trip/PlacesToVisit";
+import InfoTab from "@/components/trip/local-info/InfoTab";
 import { Loader2 } from "lucide-react";
 
 interface TripData {
@@ -21,9 +23,9 @@ interface TripData {
   };
   tripData: {
     hotel_options: Array<{
-      hotelName: string;
-      hotelAddress: string;
-      price: string;
+      HotelName: string;
+      HotelAddress: string;
+      Price: string;
       rating: number;
       description: string;
     }>;
@@ -36,10 +38,40 @@ interface TripData {
           placeName: string;
           placeDetails: string;
           rating: number;
-          travelTime: string;
+          approximate_time: string;
         }>;
       }
     >;
+    localInfo?: {
+      destination: string;
+      countryCode: string;
+      localLanguage: string;
+      emergencyContacts: Array<{
+        name: string;
+        number: string;
+        icon: "police" | "ambulance" | "embassy" | "touristPolice";
+      }>;
+      culturalTips: {
+        customs: string[];
+        etiquette: string[];
+        diningTips: string[];
+        dressCodes: string[];
+      };
+      languageHelper: {
+        phrases: Array<{
+          local: string;
+          english: string;
+          pronunciation: string;
+          category: string;
+        }>;
+      };
+      localGuidelines: {
+        transportation: string[];
+        safety: string[];
+        weather: string[];
+        business: string[];
+      };
+    };
   };
 }
 
@@ -50,6 +82,7 @@ export default function ViewTripPage({
 }) {
   const unwrappedParams = use(params);
   const [trip, setTrip] = useState<TripData | null>(null);
+  const [isLoadingLocalInfo, setIsLoadingLocalInfo] = useState(true);
 
   const getTripData = useCallback(async () => {
     try {
@@ -57,7 +90,21 @@ export default function ViewTripPage({
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        setTrip(docSnap.data() as TripData);
+        const tripData = docSnap.data() as TripData;
+        console.log("Trip Data:", JSON.stringify(tripData, null, 2));
+        setTrip(tripData);
+
+        // Check if local info exists, if not, create it
+        if (!tripData.tripData.localInfo) {
+          const defaultInfo = getDestinationDefaults(tripData.userSelection.location.label);
+          await updateLocalInfo(unwrappedParams.tripId, defaultInfo);
+          
+          // Fetch updated trip data
+          const updatedDoc = await getDoc(docRef);
+          if (updatedDoc.exists()) {
+            setTrip(updatedDoc.data() as TripData);
+          }
+        }
       } else {
         console.log("No such document!");
       }
@@ -68,7 +115,9 @@ export default function ViewTripPage({
 
   useEffect(() => {
     if (unwrappedParams.tripId) {
-      getTripData();
+      getTripData().finally(() => {
+        setIsLoadingLocalInfo(false);
+      });
     }
   }, [unwrappedParams.tripId, getTripData]);
 
@@ -94,6 +143,10 @@ export default function ViewTripPage({
           <InfoSection trip={trip} />
           <Hotels trip={trip} />
           <PlacesToVisit trip={trip} />
+          <InfoTab
+            localInfo={trip.tripData.localInfo || null}
+            isLoading={isLoadingLocalInfo}
+          />
         </div>
       </div>
     </div>

@@ -18,7 +18,7 @@ interface Place {
   placeName: string;
   placeDetails: string;
   rating: number;
-  travelTime: string;
+  approximate_time: string;
 }
 
 interface DayData {
@@ -42,7 +42,13 @@ interface TripProps {
   };
 }
 
+const calculateEndDate = (startDate: string, noOfDays: number): Date => {
+  const start = new Date(startDate);
+  return addDays(start, noOfDays - 1);
+};
+
 function PlacesToVisit({ trip }: TripProps) {
+  console.log("PlacesToVisit Trip Props:", JSON.stringify(trip, null, 2));
   const [placePhotos, setPlacePhotos] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
@@ -119,11 +125,28 @@ function PlacesToVisit({ trip }: TripProps) {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-8">
-        <h2 className="text-2xl font-semibold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
+      <div className="space-y-4 mb-8">
+        <h2 className="text-2xl font-semibold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text flex items-center gap-2">
           Your Travel Itinerary
+          {loading && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
         </h2>
-        {loading && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
+        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4" />
+            <span>{trip.userSelection.location.label}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            <span>{trip.userSelection.noOfDays} Days Trip</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4" />
+            <span>
+              {formatDate(new Date(trip.userSelection.startDate))} - {" "}
+              {formatDate(calculateEndDate(trip.userSelection.startDate, trip.userSelection.noOfDays))}
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-8">
@@ -141,24 +164,20 @@ function PlacesToVisit({ trip }: TripProps) {
                 <div className="flex items-center gap-2">
                   <CalendarDays className="h-5 w-5 text-primary" />
                   <h3 className="text-xl font-semibold">
-                    {dayKey}
-                    {formattedDate ? ` - ${formattedDate}` : ""}
+                    {dayKey}: {dayData.theme}
+                    {formattedDate ? ` (${formattedDate})` : ""}
                   </h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span>Theme: {dayData.theme}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-primary" />
-                    <span>Best Time: {dayData.best_time_to_visit}</span>
-                  </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <span>Best Time to Visit: {dayData.best_time_to_visit}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                {dayData.places.map((place: Place, index: number) => (
+                {dayData.places.map((place: Place, index: number) => {
+                  console.log(`Place ${index}:`, place);
+                  return (
                   <div
                     key={index}
                     className="group-hover:transform group-hover:scale-[1.02] transition-transform duration-300"
@@ -207,13 +226,13 @@ function PlacesToVisit({ trip }: TripProps) {
                           </div>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
                             <Clock className="h-4 w-4" />
-                            <span>{place.travelTime}</span>
+                            <span>{place.approximate_time}</span>
                           </div>
                         </div>
                       </div>
                     </Link>
                   </div>
-                ))}
+                )})}
               </div>
             </div>
           );
