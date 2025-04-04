@@ -101,8 +101,92 @@ body {
   @apply overflow-hidden;
 }
 
+/* Map marker styles */
+.mapboxgl-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure proper layout for trip page */
+.mapboxgl-canvas {
+  border-radius: inherit;
+}
+
+.mapboxgl-map, .mapboxgl-canvas-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: inherit;
+}
+
+/* Fix sticky positioning in grid layout */
+.grid > .sticky {
+  position: sticky;
+  align-self: start;
+}
+
+/* Improve map control visibility */
+.mapboxgl-ctrl-group {
+  margin-right: 12px;
+  margin-top: 12px;
+}
+
+/* Map container styles */
+.mapboxgl-canvas-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.mapboxgl-map {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.mapboxgl-marker {
+  will-change: transform;
+}
+
+.mapboxgl-marker-selected .marker-label {
+  font-weight: bold;
+}
+
+.mapboxgl-marker:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+}
+
+.mapboxgl-marker span:last-child {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mapboxgl-marker-selected {
+  z-index: 1;
+  transform: scale(1.2);
+  transition: all 0.3s ease;
+}
+
 .mapboxgl-ctrl-group button {
   @apply text-foreground;
   @apply hover:bg-accent;
   @apply transition-colors;
+}
+
+/* Additional Map container styles */
+.mapboxgl-canvas-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.mapboxgl-map {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: theme('borderRadius.lg');
 }

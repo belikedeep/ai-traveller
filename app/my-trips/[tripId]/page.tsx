@@ -93,7 +93,6 @@ export default function ViewTripPage({
 
       if (docSnap.exists()) {
         const tripData = docSnap.data() as TripData;
-        console.log("Trip Data:", JSON.stringify(tripData, null, 2));
         setTrip(tripData);
 
         // Check if local info exists, if not, create it
@@ -107,8 +106,6 @@ export default function ViewTripPage({
             setTrip(updatedDoc.data() as TripData);
           }
         }
-      } else {
-        console.log("No such document!");
       }
     } catch (error) {
       console.error("Error fetching trip:", error);
@@ -137,25 +134,27 @@ export default function ViewTripPage({
       <div className="absolute inset-0 bg-gradient-to-b from-background via-indigo-500/5 to-background -z-10" />
       <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
 
-      <div className="flex h-[calc(100vh-4rem)]">
+      <div className="grid grid-cols-2 min-h-[calc(100vh-4rem)]">
         {/* Left side: Scrollable content */}
-        <div className="w-1/2 overflow-y-auto px-4 py-8">
-          <div className="space-y-12 max-w-3xl mx-auto">
-            <InfoSection trip={trip} />
-            <Hotels trip={trip} />
-            <PlacesToVisit
-              trip={trip}
-              onPlaceSelect={(place) => setSelectedPlace(place)}
-            />
-            <InfoTab
-              localInfo={trip.tripData.localInfo || null}
-              isLoading={isLoadingLocalInfo}
-            />
+        <div className="overflow-y-auto border-r border-border/50">
+          <div className="px-6 py-8">
+            <div className="space-y-12 max-w-2xl">
+              <InfoSection trip={trip} />
+              <Hotels trip={trip} />
+              <PlacesToVisit
+                trip={trip}
+                onPlaceSelect={(place) => setSelectedPlace(place)}
+              />
+              <InfoTab
+                localInfo={trip.tripData.localInfo || null}
+                isLoading={isLoadingLocalInfo}
+              />
+            </div>
           </div>
         </div>
 
         {/* Right side: Fixed map */}
-        <div className="w-1/2 fixed right-0 top-16 bottom-0">
+        <div className="sticky top-16 h-[calc(100vh-4rem)]">
           <TripMap
             center={trip.userSelection.location.label}
             selectedPlace={selectedPlace}
