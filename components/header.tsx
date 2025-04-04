@@ -94,7 +94,7 @@ export default function Header() {
       window.removeEventListener("creditUpdate", handleCreditUpdate);
       clearInterval(creditCheckInterval);
     };
-  }, []);
+  }, [checkUserAndCredits]);
 
   useEffect(() => {
     const handleRouteChange = () => {

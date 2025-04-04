@@ -3,7 +3,7 @@
 import { use, useEffect, useState, useCallback } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/service/FirebaseConfig";
-import { getLocalInfo, getDestinationDefaults, updateLocalInfo } from "@/service/LocalInfoService";
+import { getDestinationDefaults, updateLocalInfo } from "@/service/LocalInfoService";
 import InfoSection from "@/components/trip/InfoSection";
 import Hotels from "@/components/trip/Hotels";
 import PlacesToVisit from "@/components/trip/PlacesToVisit";

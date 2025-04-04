@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import Image from "next/image";
 import {
   PHProvider,
   PostHogPageview,
@@ -104,12 +105,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-b from-background via-background/95 to-background/90`}
       >
         <noscript>
+          {/* Fallback tracking pixel - keeping standard img tag as it's hidden and for tracking only */}
           <img
             height="1"
             width="1"
+            loading="eager"
+            decoding="async"
             style={{ display: "none" }}
             src="https://www.facebook.com/tr?id=529029913148583&ev=PageView&noscript=1"
-            alt=""
+            alt="Facebook Tracking Pixel"
           />
         </noscript>
         <PHProvider>
