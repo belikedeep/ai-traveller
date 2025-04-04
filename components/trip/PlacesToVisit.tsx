@@ -23,6 +23,7 @@ interface Place {
 
 interface DayData {
   theme: string;
+  summary?: string;
   best_time_to_visit: string;
   places: Place[];
 }
@@ -125,12 +126,21 @@ function PlacesToVisit({ trip }: TripProps) {
 
   return (
     <div>
-      <div className="space-y-4 mb-8">
-        <h2 className="text-2xl font-semibold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text flex items-center gap-2">
-          Your Travel Itinerary
-          {loading && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
-        </h2>
-        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+      <div className="space-y-6 mb-8">
+        <div className="space-y-4">
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text flex items-center gap-2">
+            Your Travel Itinerary
+            {loading && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
+          </h2>
+          <p className="text-sm leading-relaxed">
+            Welcome to Gangtok, the captivating capital city of Sikkim! Nestled in the Eastern Himalayas,
+            this vibrant destination offers a perfect blend of natural beauty, cultural heritage, and modern amenities.
+            Known for its monasteries, spectacular views of Mount Kanchenjunga, and rich Sikkimese culture,
+            Gangtok provides an enchanting escape. Your carefully crafted 6-day itinerary covers the city's
+            most remarkable attractions, from ancient Buddhist monasteries to scenic viewpoints and local cultural experiences.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-4 text-sm">
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
             <span>{trip.userSelection.location.label}</span>
@@ -168,9 +178,14 @@ function PlacesToVisit({ trip }: TripProps) {
                     {formattedDate ? ` (${formattedDate})` : ""}
                   </h3>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                {dayData.summary && (
+                  <p className="text-sm">
+                    {dayData.summary}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-primary" />
-                  <span>Best Time to Visit: {dayData.best_time_to_visit}</span>
+                  <span>Recommended Time: {dayData.best_time_to_visit}</span>
                 </div>
               </div>
 
@@ -220,11 +235,11 @@ function PlacesToVisit({ trip }: TripProps) {
                             </h4>
                             <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                           </div>
-                          <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <div className="flex items-start gap-2 text-sm">
                             <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
-                            <p className="line-clamp-2">{place.placeDetails}</p>
+                            <p className="line-clamp-2 text-sm">{place.placeDetails}</p>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2">
+                          <div className="flex items-center gap-2 text-sm pt-2 text-primary/80">
                             <Clock className="h-4 w-4" />
                             <span>{place.approximate_time}</span>
                           </div>

@@ -7,9 +7,9 @@ import Image from "next/image";
 import { Star, MapPin, Loader2 } from "lucide-react";
 
 interface HotelOption {
-  HotelName: string;
-  HotelAddress: string;
-  Price: string;
+  hotelName: string;
+  hotelAddress: string;
+  price: string;
   rating: number;
   description: string;
 }
@@ -37,7 +37,7 @@ function Hotels({ trip }: TripProps) {
       const photos: Record<string, string> = {};
       for (const hotel of trip.tripData.hotel_options) {
         const result = await GetHotelDetails(
-          hotel.HotelName,
+          hotel.hotelName,
           trip?.userSelection.location.label
         );
 
@@ -45,7 +45,7 @@ function Hotels({ trip }: TripProps) {
           const photoRef = result.data.results[0].photos[0].photo_reference;
           const url = GetPlacePhoto(photoRef);
           if (url) {
-            photos[hotel.HotelName] = url;
+            photos[hotel.hotelName] = url;
           }
         }
       }
@@ -65,11 +65,18 @@ function Hotels({ trip }: TripProps) {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-8">
-        <h2 className="text-2xl font-semibold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
-          Recommended Hotels
-        </h2>
-        {loading && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
+      <div className="space-y-6 mb-8">
+        <div>
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text flex items-center gap-2 mb-4">
+            Recommended Hotels
+            {loading && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
+          </h2>
+          <p className="text-sm leading-relaxed">
+            {/* We've handpicked these luxury accommodations in Gangtok for their exceptional service,
+            prime locations, and world-class amenities. Each hotel offers stunning views of the
+            Himalayan landscape and provides easy access to major attractions. */}
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -80,7 +87,7 @@ function Hotels({ trip }: TripProps) {
           >
             <Link
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                hotel.HotelName
+                hotel.hotelName
               )}`}
               target="_blank"
               className="block group"
@@ -92,8 +99,8 @@ function Hotels({ trip }: TripProps) {
                     <div className="absolute inset-0 bg-background animate-pulse" />
                   ) : (
                     <Image
-                      src={hotelPhotos[hotel.HotelName] || "/placeholder.jpg"}
-                      alt={hotel.HotelName}
+                      src={hotelPhotos[hotel.hotelName] || "/placeholder.jpg"}
+                      alt={hotel.hotelName}
                       fill
                       className="object-cover transition-all duration-500 group-hover:scale-110"
                     />
@@ -106,17 +113,22 @@ function Hotels({ trip }: TripProps) {
 
                 <div className="p-4 space-y-2">
                   <h3 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                    {hotel.HotelName}
+                   {hotel.hotelName}
                   </h3>
-                  <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
-                    <span className="line-clamp-2">{hotel.HotelAddress}</span>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2 text-sm">
+                      <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
+                      <span className="line-clamp-2">{hotel.hotelAddress}</span>
+                    </div>
+                    <p className="text-sm line-clamp-2">
+                      {hotel.description}
+                    </p>
                   </div>
                   <div className="pt-2">
                     <span className="text-lg font-semibold text-primary">
-                      {hotel.Price}
+                      {hotel.price}
                     </span>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm">
                       {" "}
                       / night
                     </span>

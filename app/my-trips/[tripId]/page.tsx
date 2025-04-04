@@ -23,9 +23,9 @@ interface TripData {
   };
   tripData: {
     hotel_options: Array<{
-      HotelName: string;
-      HotelAddress: string;
-      Price: string;
+      hotelName: string;
+      hotelAddress: string;
+      price: string;
       rating: number;
       description: string;
     }>;
@@ -130,18 +130,15 @@ export default function ViewTripPage({
     );
   }
 
-  // TODO : Remove cat place holder
-
   return (
     <div className="relative">
-      {/* Background decorations */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-indigo-500/5 to-background -z-10" />
       <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
 
       <div className="container mx-auto px-4 py-8 md:py-12 lg:py-16">
         <div className="space-y-12">
           <InfoSection trip={trip} />
-          <Hotels trip={trip} />
+          {/* <Hotels trip={trip} /> */}
           <PlacesToVisit trip={trip} />
           <InfoTab
             localInfo={trip.tripData.localInfo || null}
