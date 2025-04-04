@@ -22,7 +22,7 @@ export default function Home() {
     <main className="relative">
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background" />
-        <div className="absolute inset-0 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.primary),transparent)] opacity-5" />
+        <div className="absolute inset-0 bg-[radial-gradient(45rem_50rem_at_top,hsl(var(--primary)),transparent)] opacity-5" />
         <div className="absolute inset-0 bg-grid-white/[0.02]" />
       </div>
 

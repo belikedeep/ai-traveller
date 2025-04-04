@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import Image from "next/image";
 import {
   PHProvider,
   PostHogPageview,
@@ -23,10 +22,12 @@ const geistMono = Geist_Mono({
 });
 
 import type { Viewport } from "next";
+import Image from "next/image";
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#000000",
 };
 
 export const metadata: Metadata = {
@@ -77,7 +78,6 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
   },
   manifest: "/site.webmanifest",
-  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -106,7 +106,7 @@ export default function RootLayout({
       >
         <noscript>
           {/* Fallback tracking pixel - keeping standard img tag as it's hidden and for tracking only */}
-          <img
+          <Image
             height="1"
             width="1"
             loading="eager"

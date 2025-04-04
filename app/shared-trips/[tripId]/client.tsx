@@ -15,15 +15,17 @@ interface TripData {
     location: {
       label: string;
     };
+    startDate: string;
+    endDate: string;
     noOfDays: number;
     budget: string;
     travellingWith: string;
   };
   tripData: {
     hotel_options: Array<{
-      hotelName: string;
-      hotelAddress: string;
-      price: string;
+      HotelName: string;
+      HotelAddress: string;
+      Price: string;
       rating: number;
       description: string;
     }>;
@@ -36,7 +38,7 @@ interface TripData {
           placeName: string;
           placeDetails: string;
           rating: number;
-          travelTime: string;
+          approximate_time: string;
         }>;
       }
     >;

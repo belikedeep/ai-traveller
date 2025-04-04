@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import CustomDialog from "@/components/ui/CustomDialog";
 import { FcGoogle } from "react-icons/fc";
@@ -48,7 +48,7 @@ export default function Header() {
     }
   }, [user, pathname, router]);
 
-  const checkUserAndCredits = async () => {
+  const checkUserAndCredits = useCallback(async () => {
     const userData = syncUserAuth();
     if (userData) {
       const firestoreUser = await getUser(userData.email);
@@ -70,7 +70,7 @@ export default function Header() {
         setUser(userData);
       }
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     checkUserAndCredits();
