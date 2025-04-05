@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState, ReactNode } from "react";
 import { Loader } from "lucide-react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { Loader as GoogleLoader, Libraries } from "@googlemaps/js-api-loader";
 
 interface Place {
   placeName: string;
@@ -16,39 +15,45 @@ interface TripMapProps {
   center: string;
   selectedPlace?: string | null;
   places: Place[];
+  onMarkersCleared?: () => void;
 }
 
-interface MapboxFeature {
-  id: string;
-  type: string;
-  place_type: string[];
-  relevance: number;
-  text: string;
-  place_name: string;
-  center: [number, number];
-  bbox?: [number, number, number, number];
-  context?: Array<{
-    id: string;
-    text: string;
-    wikidata?: string;
-    short_code?: string;
-  }>;
+interface MarkerInfo {
+  marker: google.maps.Marker;
+  infoWindow: google.maps.InfoWindow;
+  placeName: string;
+  placeIndex: number;
 }
 
-interface MapboxResponse {
-  type: string;
-  features: MapboxFeature[];
-}
+const LIBRARIES: Libraries = ["places"];
 
-// Initialize Mapbox access token
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
+// Initialize Google Maps loader
+const loader = new GoogleLoader({
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_PLACE_API_KEY || "",
+  version: "weekly",
+  libraries: LIBRARIES
+});
 
-export default function TripMap({ center, selectedPlace, places }: TripMapProps): ReactNode {
+export default function TripMap({ 
+  center, 
+  selectedPlace, 
+  places,
+  onMarkersCleared
+}: TripMapProps): ReactNode {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const boundsRef = useRef<mapboxgl.LngLatBounds | null>(null);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<MarkerInfo[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Function to clear all markers
+  const clearAllMarkers = () => {
+    markersRef.current.forEach(({ marker, infoWindow }) => {
+      marker.setMap(null);
+      infoWindow.close();
+    });
+    markersRef.current = [];
+    onMarkersCleared?.();
+  };
 
   // Initialize map
   useEffect(() => {
@@ -56,35 +61,44 @@ export default function TripMap({ center, selectedPlace, places }: TripMapProps)
       if (!mapRef.current) return;
 
       try {
-        // Get initial location coordinates
-        const response = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(center)}.json?` +
-          `access_token=${mapboxgl.accessToken}&types=place&limit=1`
-        );
-        const data = await response.json() as MapboxResponse;
+        await loader.load();
+        const { Map, Geocoder } = google.maps;
 
-        if (!data.features?.length) {
-          throw new Error("Location not found");
+        // Clear any existing markers first
+        clearAllMarkers();
+
+        // Get city coordinates
+        const geocoder = new Geocoder();
+        const result = await geocoder.geocode({ 
+          address: `${center}, India`,
+          region: 'in'
+        });
+
+        if (!result.results?.length) {
+          throw new Error("City not found");
         }
 
-        const [lng, lat] = data.features[0].center;
+        const location = result.results[0].geometry.location;
+        console.log('City location:', location.toJSON());
 
-        // Create map instance
-        const map = new mapboxgl.Map({
-          container: mapRef.current,
-          style: "mapbox://styles/mapbox/streets-v12",
-          center: [lng, lat],
-          zoom: 12
+        const map = new Map(mapRef.current, {
+          center: location,
+          zoom: 12,
+          mapTypeControl: false,
+          fullscreenControl: false,
+          streetViewControl: false,
+          styles: [
+            {
+              featureType: "poi",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            }
+          ]
         });
 
         mapInstanceRef.current = map;
-        boundsRef.current = new mapboxgl.LngLatBounds();
+        setLoading(false);
 
-        map.addControl(new mapboxgl.NavigationControl(), "top-right");
-
-        map.on("load", () => {
-          setLoading(false);
-        });
       } catch (error) {
         console.error("Error initializing map:", error);
         setLoading(false);
@@ -94,231 +108,144 @@ export default function TripMap({ center, selectedPlace, places }: TripMapProps)
     initializeMap();
 
     return () => {
+      clearAllMarkers();
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
       }
     };
   }, [center]);
 
-  // Create and manage markers
+  // Add markers for places
   useEffect(() => {
-    const markerCleanupFns: Array<() => void> = [];
     const addMarkers = async () => {
-      if (!mapInstanceRef.current || !places.length) return;
+      const map = mapInstanceRef.current;
+      if (!map) return;
 
-      // Clear existing markers and event listeners
-      markerCleanupFns.forEach(cleanup => cleanup());
-      markerCleanupFns.length = 0;
-      markersRef.current.forEach(marker => marker.remove());
-      markersRef.current = [];
+      // Clear existing markers
+      clearAllMarkers();
 
-      boundsRef.current = new mapboxgl.LngLatBounds();
+      const bounds = new google.maps.LatLngBounds();
+      const geocoder = new google.maps.Geocoder();
 
       for (const [index, place] of places.entries()) {
         try {
-          // Search with city context
-          const query = `${place.placeName} ${center}`;
-          const response = await fetch(
-            `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?` +
-            `access_token=${mapboxgl.accessToken}&limit=1`
-          );
+          const searchResult = await geocoder.geocode({
+            address: `${place.placeName}, ${center}, India`,
+            region: 'in'
+          });
 
-          const data = await response.json() as MapboxResponse;
-
-          if (data.features?.length) {
-            const feature = data.features[0];
-            console.log(`Found location for ${place.placeName}:`, feature);
-
-            // Create marker element with explicit place name data
-            const el = document.createElement("div");
-            el.className = "flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-semibold shadow-lg transition-all duration-300 cursor-pointer border-2 border-white";
-            el.innerHTML = `
-              <span class="marker-label">${String(index + 1)}</span>
-              <span class="sr-only" data-place-name="${place.placeName}">${place.placeName}</span>
-            `;
-            el.setAttribute('data-place-name', place.placeName);
-
-            // Create marker with click handler
-            const marker = new mapboxgl.Marker({
-              clickTolerance: 3,
-              element: el,
-              anchor: 'center'
-            })
-              .setLngLat(feature.center)
-              .setPopup(
-                new mapboxgl.Popup({
-                  offset: 25,
-                  closeOnClick: false,
-                  maxWidth: '300px'
-                })
-                .setHTML(`
-                  <div class="p-3">
-                    <h3 class="font-semibold text-base mb-2">${place.placeName}</h3>
-                    <p class="text-sm mb-2">${place.placeDetails}</p>
-                    <p class="text-sm flex items-center gap-2">
-                      <span>⭐ ${place.rating}</span>
-                      <span>⏱️ ${place.approximate_time}</span>
-                    </p>
-                  </div>
-                `)
-              )
-              .addTo(mapInstanceRef.current);
-
-            // Add click handler to marker element
-            const handleMarkerClick = () => {
-              console.log('Marker clicked:', place.placeName);
-              
-              // Remove existing popups
-              markersRef.current.forEach(m => m.getPopup()?.remove());
-              
-              // Update marker appearances
-              markersRef.current.forEach(m => {
-                const elem = m.getElement();
-                if (elem.getAttribute('data-place-name') === place.placeName) {
-                  elem.classList.add('mapboxgl-marker-selected');
-                  elem.style.transform = 'scale(1.2)';
-                  
-                  // Show popup for selected marker
-                  m.getPopup()?.addTo(mapInstanceRef.current!);
-                } else {
-                  elem.classList.remove('mapboxgl-marker-selected');
-                  elem.style.transform = 'scale(1)';
-                }
-              });
-
-              // Center map on clicked marker with offset for popup
-              const map = mapInstanceRef.current;
-              if (map) {
-                const popupHeight = marker.getPopup()?.getElement()?.offsetHeight || 0;
-                const offset = popupHeight > 0 ? popupHeight / 2 : 0;
-                
-                map.easeTo({
-                  center: [
-                    marker.getLngLat().lng,
-                    marker.getLngLat().lat - offset / (Math.pow(2, map.getZoom()) * 10)
-                  ],
-                  zoom: 15,
-                  duration: 1500,
-                  essential: true
-                });
-              }
-            };
-
-            el.addEventListener('click', handleMarkerClick);
-
-            // Store cleanup function for marker click handler
-            markerCleanupFns.push(() => {
-              el.removeEventListener('click', handleMarkerClick);
-            });
-
-            markersRef.current.push(marker);
-            boundsRef.current.extend(feature.center);
-          } else {
-            console.warn(`No location found for ${place.placeName}`);
+          if (!searchResult.results?.length) {
+            console.warn(`No location found for: ${place.placeName}`);
+            continue;
           }
+
+          const position = searchResult.results[0].geometry.location;
+
+          // Create info window
+          const infoWindow = new google.maps.InfoWindow({
+            content: `
+              <div class="p-4 max-w-[300px]">
+                <h3 class="font-semibold text-base mb-3 text-gray-900">${place.placeName}</h3>
+                <p class="text-sm mb-3 text-gray-700">${place.placeDetails}</p>
+                <div class="text-sm flex items-center justify-between">
+                  <span class="flex items-center gap-1">
+                    <span class="text-yellow-500">⭐</span>
+                    <span class="text-gray-600">${place.rating}</span>
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <span class="text-blue-500">⏱️</span>
+                    <span class="text-gray-600">${place.approximate_time}</span>
+                  </span>
+                </div>
+              </div>
+            `,
+            pixelOffset: new google.maps.Size(0, -30)
+          });
+
+          // Create marker
+          const marker = new google.maps.Marker({
+            position,
+            map,
+            label: {
+              text: String(index + 1),
+              color: "white",
+              className: "font-semibold text-sm"
+            },
+            icon: {
+              path: google.maps.SymbolPath.CIRCLE,
+              fillColor: selectedPlace === place.placeName ? "rgb(37 99 235)" : "rgb(22 163 74)",
+              fillOpacity: 1,
+              strokeColor: "white",
+              strokeWeight: 2,
+              scale: 15,
+              labelOrigin: new google.maps.Point(0, 0)
+            },
+            title: place.placeName,
+            optimized: false
+          });
+
+          marker.addListener("click", () => {
+            markersRef.current.forEach(({ infoWindow }) => infoWindow.close());
+            infoWindow.open(map, marker);
+            map.panTo(position);
+            map.setZoom(16);
+          });
+
+          markersRef.current.push({ 
+            marker,
+            infoWindow,
+            placeName: place.placeName,
+            placeIndex: index
+          });
+          bounds.extend(position);
         } catch (error) {
-          console.error(`Error creating marker for ${place.placeName}:`, error);
+          console.error(`Error adding marker for ${place.placeName}:`, error);
         }
       }
 
-      // Fit bounds with all markers
-      if (markersRef.current.length > 0 && boundsRef.current && mapInstanceRef.current) {
-        // Add padding based on screen size
-        const padding = Math.min(window.innerWidth, window.innerHeight) * 0.2;
-        mapInstanceRef.current.fitBounds(boundsRef.current, {
-          padding: {
-            top: padding,
-            bottom: padding,
-            left: padding,
-            right: padding
-          },
-          maxZoom: 14
-        });
+      // Fit map to show all markers
+      if (markersRef.current.length > 0) {
+        const padding = { top: 50, right: 50, bottom: 50, left: 50 };
+        map.fitBounds(bounds, padding);
       }
-    };
-
-    // Add cleanup function for marker event listeners
-    return () => {
-      markerCleanupFns.forEach(cleanup => cleanup());
     };
 
     addMarkers();
-  }, [places, center]);
+  }, [places, center, selectedPlace]);
 
   // Handle selected place
   useEffect(() => {
-    console.log('Selected place changed:', selectedPlace);
-    console.log('Current markers:', markersRef.current);
-    
-    if (!mapInstanceRef.current || !selectedPlace || !markersRef.current.length) {
-      console.log('Missing required refs or selected place');
+    if (!mapInstanceRef.current || !markersRef.current.length) return;
+
+    // If no place selected, hide all markers
+    if (!selectedPlace) {
+      markersRef.current.forEach(({ marker }) => {
+        marker.setVisible(false);
+      });
       return;
     }
 
-    // Debug: log all marker texts
-    markersRef.current.forEach(m => {
-      const text = m.getElement().querySelector('.sr-only')?.textContent;
-      console.log('Marker text:', text);
-    });
-
-    const marker = markersRef.current.find(m => {
-      const el = m.getElement();
-      const placeName = el.getAttribute('data-place-name');
-      console.log('Comparing:', placeName, 'with:', selectedPlace);
-      return placeName === selectedPlace;
-    });
-
-    console.log('Found marker:', marker);
-
-    if (marker) {
-      console.log('Found matching marker, updating appearance');
+    // Show and highlight selected marker
+    markersRef.current.forEach(({ marker, infoWindow, placeName }) => {
+      marker.setVisible(true);
       
-      // Reset all markers with proper state management
-      markersRef.current.forEach(m => {
-        const el = m.getElement();
-        if (el.getAttribute('data-place-name') === selectedPlace) {
-          el.classList.add('mapboxgl-marker-selected');
-          el.style.transform = 'scale(1.2)';
-        } else {
-          el.classList.remove('mapboxgl-marker-selected');
-          el.style.transform = 'scale(1)';
-          m.getPopup()?.remove();
-        }
-      });
-
-      // Ensure popup is properly shown
-      const popupRef = marker.getPopup();
-      if (popupRef) {
-        popupRef.remove(); // Remove any existing popup
-        setTimeout(() => {
-          popupRef.addTo(mapInstanceRef.current!); // Add popup back after a brief delay
-        }, 50);
+      if (placeName === selectedPlace) {
+        infoWindow.open(mapInstanceRef.current, marker);
+        mapInstanceRef.current?.panTo(marker.getPosition()!);
+        mapInstanceRef.current?.setZoom(16);
+        
+        marker.setIcon({
+          ...marker.getIcon() as google.maps.Symbol,
+          fillColor: "rgb(37 99 235)" // blue-600
+        });
+      } else {
+        infoWindow.close();
+        marker.setIcon({
+          ...marker.getIcon() as google.maps.Symbol,
+          fillColor: "rgb(22 163 74)" // green-600
+        });
       }
-
-      console.log('Flying to marker position:', marker.getLngLat());
-      
-      // Animate to marker with a slight delay to ensure smooth transition
-      setTimeout(() => {
-        const map = mapInstanceRef.current;
-        if (map) {
-          // Get popup height for offset calculation
-          const popupHeight = marker.getPopup()?.getElement()?.offsetHeight || 0;
-          
-          // Calculate offset to center marker and show popup
-          const offset = popupHeight > 0 ? popupHeight / 2 : 0;
-          
-          map.easeTo({
-            center: [
-              marker.getLngLat().lng,
-              marker.getLngLat().lat - offset / (Math.pow(2, map.getZoom()) * 10)
-            ],
-            zoom: 15,
-            duration: 1500,
-            essential: true
-          });
-        }
-      }, 100);
-    }
+    });
   }, [selectedPlace]);
 
   return (

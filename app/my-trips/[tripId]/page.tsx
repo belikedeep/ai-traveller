@@ -85,6 +85,14 @@ export default function ViewTripPage({
   const [trip, setTrip] = useState<TripData | null>(null);
   const [isLoadingLocalInfo, setIsLoadingLocalInfo] = useState(true);
   const [selectedPlace, setSelectedPlace] = useState<string | null>(null);
+  const [markersVisible, setMarkersVisible] = useState(true);
+
+  // Handle place selection from itinerary
+  const handlePlaceSelect = (place: string) => {
+    console.log('Selected place:', place);
+    setSelectedPlace(place);
+    setMarkersVisible(true); // Ensure markers are visible when selecting
+  };
 
   const getTripData = useCallback(async () => {
     try {
@@ -143,7 +151,8 @@ export default function ViewTripPage({
               <Hotels trip={trip} />
               <PlacesToVisit
                 trip={trip}
-                onPlaceSelect={(place) => setSelectedPlace(place)}
+                onPlaceSelect={handlePlaceSelect}
+                selectedPlace={selectedPlace}
               />
               <InfoTab
                 localInfo={trip.tripData.localInfo || null}

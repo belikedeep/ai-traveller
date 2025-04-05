@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState, useCallback, memo, useMemo } from "react";
 import { GetPlaceDetails, GetPlacePhoto } from "@/service/GlobalAPI";
 import Image from "next/image";
@@ -42,6 +41,7 @@ interface TripProps {
     };
   };
   onPlaceSelect?: (place: string) => void;
+  selectedPlace?: string | null;
 }
 
 const calculateEndDate = (startDate: string, noOfDays: number): Date => {
@@ -49,7 +49,7 @@ const calculateEndDate = (startDate: string, noOfDays: number): Date => {
   return addDays(start, noOfDays - 1);
 };
 
-function PlacesToVisit({ trip, onPlaceSelect }: TripProps) {
+function PlacesToVisit({ trip, onPlaceSelect, selectedPlace }: TripProps) {
   const [placePhotos, setPlacePhotos] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
@@ -58,6 +58,7 @@ function PlacesToVisit({ trip, onPlaceSelect }: TripProps) {
     () => memoizedTrip?.tripData?.itinerary || {},
     [memoizedTrip?.tripData?.itinerary]
   );
+  
   const memoizedDays = useMemo(() => {
     const days = Object.entries(memoizedTrip?.tripData?.itinerary || {});
     return days.sort((a, b) => {
@@ -72,7 +73,7 @@ function PlacesToVisit({ trip, onPlaceSelect }: TripProps) {
       try {
         if (!trip?.userSelection?.startDate) return null;
         const startDate = new Date(trip.userSelection.startDate);
-        if (isNaN(startDate.getTime())) return null; // Check if date is valid
+        if (isNaN(startDate.getTime())) return null;
         return addDays(startDate, dayNumber - 1);
       } catch (error) {
         console.error("Error calculating date:", error);
@@ -124,6 +125,13 @@ function PlacesToVisit({ trip, onPlaceSelect }: TripProps) {
     }
   }, [memoizedItinerary, fetchPlacePhotos]);
 
+  const handlePlaceClick = useCallback((placeName: string) => {
+    if (onPlaceSelect) {
+      console.log('Selecting place:', placeName);
+      onPlaceSelect(placeName);
+    }
+  }, [onPlaceSelect]);
+
   return (
     <div>
       <div className="space-y-6 mb-8">
@@ -158,7 +166,7 @@ function PlacesToVisit({ trip, onPlaceSelect }: TripProps) {
       </div>
 
       <div className="space-y-8">
-        {memoizedDays.map(([dayKey, dayData]: [string, DayData]) => {
+        {memoizedDays.map(([dayKey, dayData]) => {
           const dayNumber = parseInt(dayKey.replace("Day ", ""));
           const date = getDateForDay(dayNumber);
           const formattedDate = formatDate(date);
@@ -177,9 +185,7 @@ function PlacesToVisit({ trip, onPlaceSelect }: TripProps) {
                   </h3>
                 </div>
                 {dayData.summary && (
-                  <p className="text-sm">
-                    {dayData.summary}
-                  </p>
+                  <p className="text-sm">{dayData.summary}</p>
                 )}
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-primary" />
@@ -188,61 +194,74 @@ function PlacesToVisit({ trip, onPlaceSelect }: TripProps) {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                {dayData.places.map((place: Place, index: number) => {
-                  console.log(`Place ${index}:`, place);
-                  return (
+                {dayData.places.map((place, index) => (
                   <div
-                    key={index}
-                    className="group-hover:transform group-hover:scale-[1.02] transition-transform duration-300"
+                    key={`${dayKey}-place-${index}`}
+                    className={`group transition-all duration-300 ${
+                      selectedPlace === place.placeName
+                        ? "transform scale-[1.02]"
+                        : "hover:transform hover:scale-[1.02]"
+                    }`}
+                    onClick={() => handlePlaceClick(place.placeName)}
                   >
                     <div
-                      onClick={() => onPlaceSelect?.(place.placeName)}
-                      className="block group cursor-pointer"
+                      className={`rounded-xl border overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 ${
+                        selectedPlace === place.placeName
+                          ? "border-primary shadow-xl shadow-primary/10"
+                          : "border-border/50 hover:shadow-xl hover:shadow-primary/10"
+                      } ${onPlaceSelect ? "cursor-pointer" : ""}`}
                     >
-                      <div className="rounded-xl border border-border/50 overflow-hidden backdrop-blur-sm bg-background/50 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/10">
-                        <div className="relative aspect-video">
-                          <div className="absolute inset-0 z-10" />
-                          {loading ? (
-                            <div className="absolute inset-0 bg-background animate-pulse" />
-                          ) : (
-                            <Image
-                              src={
-                                placePhotos[place.placeName] ||
-                                "/placeholder.jpg"
-                              }
-                              alt={place.placeName}
-                              fill
-                              className="object-cover transition-all duration-500 group-hover:scale-110"
-                            />
-                          )}
-                          <div className="absolute top-3 right-3 z-20">
-                            <div className="flex items-center gap-1 text-sm bg-background/90 px-2 py-1 rounded-full backdrop-blur-sm border border-border/50">
-                              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                              <span>{place.rating}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="p-4 space-y-2">
-                          <div className="flex items-center justify-between gap-2">
-                            <h4 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                              {place.placeName}
-                            </h4>
-                            <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                          </div>
-                          <div className="flex items-start gap-2 text-sm">
-                            <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
-                            <p className="line-clamp-2 text-sm">{place.placeDetails}</p>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm pt-2 text-primary/80">
-                            <Clock className="h-4 w-4" />
-                            <span>{place.approximate_time}</span>
+                      <div className="relative aspect-video">
+                        <div className="absolute inset-0 z-10" />
+                        {loading ? (
+                          <div className="absolute inset-0 bg-background animate-pulse" />
+                        ) : (
+                          <Image
+                            src={placePhotos[place.placeName] || "/placeholder.jpg"}
+                            alt={place.placeName}
+                            fill
+                            className="object-cover transition-all duration-500 group-hover:scale-110"
+                          />
+                        )}
+                        <div className="absolute top-3 right-3 z-20">
+                          <div className="flex items-center gap-1 text-sm bg-background/90 px-2 py-1 rounded-full backdrop-blur-sm border border-border/50">
+                            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                            <span>{place.rating}</span>
                           </div>
                         </div>
                       </div>
+
+                      <div className="p-4 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <h4
+                            className={`font-semibold line-clamp-1 transition-colors ${
+                              selectedPlace === place.placeName
+                                ? "text-primary"
+                                : "group-hover:text-primary"
+                            }`}
+                          >
+                            {place.placeName}
+                          </h4>
+                          <ArrowUpRight
+                            className={`h-4 w-4 transition-all ${
+                              selectedPlace === place.placeName
+                                ? "text-primary translate-x-0.5 -translate-y-0.5"
+                                : "text-muted-foreground group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                            }`}
+                          />
+                        </div>
+                        <div className="flex items-start gap-2 text-sm">
+                          <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
+                          <p className="line-clamp-2 text-sm">{place.placeDetails}</p>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm pt-2 text-primary/80">
+                          <Clock className="h-4 w-4" />
+                          <span>{place.approximate_time}</span>
+                        </div>
+                      </div>
                     </div>
-                   </div>
-                )})}
+                  </div>
+                ))}
               </div>
             </div>
           );
