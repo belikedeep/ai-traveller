@@ -106,7 +106,7 @@ export default function RootLayout({
       >
         <noscript>
           {/* Fallback tracking pixel - keeping standard img tag as it's hidden and for tracking only */}
-          <Image
+          <img
             height="1"
             width="1"
             loading="eager"
